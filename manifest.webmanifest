@@ -1,0 +1,14 @@
+{
+  "name": "Mum's Daily English 每日英语",
+  "short_name": "English 英语",
+  "description": "Learn English a little every day — bilingual lessons, phrases and progress.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3ec",
+  "theme_color": "#177a4c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

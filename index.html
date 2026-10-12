@@ -1,0 +1,1424 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#177a4c"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="icon-180.png"><link rel="manifest" href="manifest.webmanifest"><style>:root{color-scheme:light}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Mum's Daily English</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Noto+Sans+SC:wght@400;700;900&display=swap">
+<style>
+/* Layout: single centred phone-width column, 3-tab bottom nav, one primary action per screen */
+:root{
+  --bg:#f6f3ec;
+  --surface:#fffdf8;
+  --surface2:#f1ede2;
+  --ink:#27241d;
+  --ink2:#6b665a;
+  --muted:#96907f;
+  --line:#e7e1d2;
+  --accent:#177a4c;
+  --accent-ink:#ffffff;
+  --accent-soft:#e2f1e8;
+  --bar:#88c4a4;
+  --gold:#d98e04;
+  --gold-soft:#faf0da;
+  --danger:#c03d3d;
+  --danger-soft:#f9e7e7;
+  --l1:#1f9d61; --l2:#2a78d6; --l3:#6246b4; --l4:#c2410c; --lp:#b07508;
+  --shadow:0 1px 2px rgba(68,58,36,.06),0 6px 18px rgba(68,58,36,.07);
+  --radius:20px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15130f; --surface:#201d17; --surface2:#2a261e;
+    --ink:#f3efe5; --ink2:#b4ad9c; --muted:#8a8373; --line:#363126;
+    --accent:#3dbd7d; --accent-ink:#0c2417; --accent-soft:#1d3528;
+    --bar:#2f5d45;
+    --gold:#e8a93c; --gold-soft:#372c15;
+    --danger:#e06c6c; --danger-soft:#3a2020;
+    --l1:#34c184; --l2:#5598e7; --l3:#9a89e8; --l4:#e8824a; --lp:#dba23c;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15130f; --surface:#201d17; --surface2:#2a261e;
+  --ink:#f3efe5; --ink2:#b4ad9c; --muted:#8a8373; --line:#363126;
+  --accent:#3dbd7d; --accent-ink:#0c2417; --accent-soft:#1d3528;
+  --bar:#2f5d45;
+  --gold:#e8a93c; --gold-soft:#372c15;
+  --danger:#e06c6c; --danger-soft:#3a2020;
+  --l1:#34c184; --l2:#5598e7; --l3:#9a89e8; --l4:#e8824a; --lp:#dba23c;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Nunito","Noto Sans SC","Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  font-size:1.0625rem; line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+}
+#app{max-width:30rem; margin:0 auto; padding:1rem 1rem 7.5rem; min-height:60vh}
+body.nonav #app{padding-bottom:2.5rem}
+h1,h2,h3{margin:0; text-wrap:balance; line-height:1.25}
+button{font:inherit; color:inherit; background:none; border:none; padding:0; cursor:pointer; -webkit-tap-highlight-color:transparent}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:8px}
+a{color:var(--accent)}
+.zh{display:block; font-size:.82em; font-weight:400; color:var(--ink2); margin-top:.1em}
+.zh.inline{display:inline; margin-left:.35em}
+body.nozh .zh{display:none}
+body.nosound .sndonly{display:none !important}
+
+/* ---------- shared components ---------- */
+.card{background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.1rem 1.15rem; border:1px solid var(--line)}
+.stack{display:flex; flex-direction:column; gap:.9rem}
+.row{display:flex; align-items:center; gap:.75rem; flex-wrap:wrap}
+.grow{flex:1; min-width:0}
+.btn{
+  display:flex; align-items:center; justify-content:center; gap:.5rem;
+  min-height:3.5rem; padding:.6rem 1.2rem; border-radius:18px;
+  font-weight:800; font-size:1.15rem; text-align:center; width:100%;
+  transition:transform .08s ease;
+}
+.btn:active{transform:scale(.97)}
+.btn .zh{margin-top:0; font-weight:700}
+.btn-primary{background:var(--accent); color:var(--accent-ink); box-shadow:var(--shadow)}
+.btn-primary .zh{color:var(--accent-ink); opacity:.85}
+.btn-soft{background:var(--accent-soft); color:var(--accent)}
+.btn-soft .zh{color:var(--accent)}
+.btn-plain{background:var(--surface); border:2px solid var(--line); color:var(--ink)}
+.btn-gold{background:var(--gold-soft); color:var(--gold)}
+.btn-gold .zh{color:var(--gold)}
+.btn-danger{background:var(--danger-soft); color:var(--danger)}
+.btn-danger .zh{color:var(--danger)}
+.topbar{display:flex; align-items:center; gap:.6rem; margin-bottom:1rem}
+.backbtn{
+  display:flex; align-items:center; gap:.35rem; font-weight:800; color:var(--ink2);
+  background:var(--surface); border:1px solid var(--line); border-radius:999px;
+  padding:.5rem .95rem; min-height:2.75rem; font-size:1rem;
+}
+.screen-title{font-size:1.35rem; font-weight:900}
+.eyebrow{font-size:.8rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.chip-group{display:flex; gap:.5rem; flex-wrap:wrap}
+.chip{
+  border:2px solid var(--line); border-radius:999px; padding:.45rem 1rem;
+  font-weight:800; font-size:1rem; min-height:2.75rem; background:var(--surface); color:var(--ink2);
+}
+.chip .zh{display:inline; margin-left:.3em; font-size:.85em}
+.chip.on{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
+.chip.on .zh{color:var(--accent)}
+.speak-btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:.4rem;
+  background:var(--accent-soft); color:var(--accent); border-radius:999px;
+  min-height:3rem; padding:.4rem 1.1rem; font-weight:800; font-size:1.05rem;
+}
+.speak-btn.small{min-height:2.4rem; padding:.2rem .8rem; font-size:.95rem}
+.speak-btn.gold{background:var(--gold-soft); color:var(--gold)}
+
+/* ---------- tab bar ---------- */
+#tabbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:40;
+  background:var(--surface); border-top:1px solid var(--line);
+  padding:.4rem .5rem calc(.5rem + env(safe-area-inset-bottom,0px));
+  display:flex; justify-content:center; gap:.25rem;
+}
+body.nonav #tabbar{display:none}
+#tabbar button{
+  flex:1; max-width:10rem; display:flex; flex-direction:column; align-items:center; gap:.05rem;
+  padding:.35rem .25rem; border-radius:14px; font-weight:800; font-size:.92rem; color:var(--muted);
+}
+#tabbar button .ico{font-size:1.45rem; line-height:1.2}
+#tabbar button.on{color:var(--accent); background:var(--accent-soft)}
+#tabbar button .zh{font-size:.78rem; color:inherit; opacity:.8}
+
+/* ---------- home ---------- */
+.hello{display:flex; align-items:center; gap:.8rem; margin:.3rem 0 1rem}
+.koala{
+  width:3.4rem; height:3.4rem; border-radius:50%; background:var(--accent-soft);
+  display:flex; align-items:center; justify-content:center; font-size:2rem; flex:none;
+}
+.koala.logo{background:none; border-radius:26%; overflow:hidden; box-shadow:var(--shadow)}
+.koala.logo svg{width:100%; height:100%; display:block}
+.hello h1{font-size:1.5rem; font-weight:900}
+.hello .date{color:var(--ink2); font-size:.95rem; font-weight:700}
+.statrow{display:flex; gap:.9rem}
+.statrow .card{flex:1; display:flex; align-items:center; gap:.7rem; padding:.85rem .95rem}
+.flame{font-size:1.7rem}
+.stat-big{font-size:1.5rem; font-weight:900; line-height:1.1}
+.stat-lab{font-size:.85rem; color:var(--ink2); font-weight:700; line-height:1.25}
+.ring{flex:none}
+.continue-card{border:none; background:var(--accent); color:var(--accent-ink); text-align:left; width:100%; border-radius:var(--radius); box-shadow:var(--shadow); padding:1.15rem 1.2rem}
+.continue-card .eyebrow{color:var(--accent-ink); opacity:.75}
+.continue-card .zh{color:var(--accent-ink); opacity:.8}
+.continue-card .big{font-size:1.45rem; font-weight:900; margin:.2rem 0 .1rem}
+.continue-card .sub{opacity:.9; font-weight:700}
+.continue-card .go{margin-top:.8rem; background:rgba(255,255,255,.22); border-radius:14px; padding:.6rem; text-align:center; font-weight:900; font-size:1.1rem}
+:root[data-theme="dark"] .continue-card .go{background:rgba(0,0,0,.18)}
+.pod-card .phrase-en{font-size:1.3rem; font-weight:900; margin:.25rem 0 0}
+.pod-card .phrase-zh{color:var(--ink2); font-weight:700}
+.nudge{display:flex; gap:.6rem; align-items:flex-start; background:var(--gold-soft); border:1px solid var(--line); border-radius:var(--radius); padding:.9rem 1rem}
+.nudge .t{font-weight:800}
+.linkbtn{font-weight:800; color:var(--accent); font-size:1rem; min-height:2.5rem; display:inline-flex; align-items:center}
+
+/* ---------- levels ---------- */
+.level-card{width:100%; text-align:left; background:var(--surface); border:1px solid var(--line); border-left:.5rem solid var(--lc,var(--accent)); border-radius:var(--radius); box-shadow:var(--shadow); padding:1rem 1.1rem; display:flex; gap:.85rem; align-items:center}
+.level-emoji{font-size:2rem; flex:none}
+.level-name{font-weight:900; font-size:1.15rem}
+.level-desc{color:var(--ink2); font-size:.92rem; font-weight:700}
+.meter{height:.65rem; border-radius:999px; background:var(--surface2); background:color-mix(in srgb, var(--lc,var(--accent)) 16%, var(--surface)); overflow:hidden; margin-top:.45rem}
+.meter>i{display:block; height:100%; border-radius:999px; background:var(--lc,var(--accent))}
+.level-count{font-size:.85rem; color:var(--muted); font-weight:800; flex:none; text-align:right}
+.unit-row{width:100%; text-align:left; display:flex; align-items:center; gap:.8rem; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:.85rem 1rem; box-shadow:var(--shadow)}
+.unit-row:disabled{opacity:.45; box-shadow:none}
+.unit-emoji{font-size:1.6rem; width:2.6rem; height:2.6rem; border-radius:12px; background:var(--surface2); display:flex; align-items:center; justify-content:center; flex:none}
+.unit-name{font-weight:800; font-size:1.05rem}
+.unit-state{flex:none; font-weight:800; color:var(--muted); font-size:1rem}
+.stars{color:var(--gold); letter-spacing:.05em}
+
+/* ---------- lesson ---------- */
+.lesson-top{display:flex; align-items:center; gap:.8rem; margin-bottom:1.1rem}
+.exitbtn{width:2.75rem; height:2.75rem; border-radius:50%; background:var(--surface); border:1px solid var(--line); font-size:1.2rem; font-weight:900; color:var(--ink2); flex:none; display:flex; align-items:center; justify-content:center}
+.pbar{flex:1; height:.8rem; border-radius:999px; background:var(--surface2); overflow:hidden}
+.pbar>i{display:block; height:100%; background:var(--accent); border-radius:999px; transition:width .25s ease}
+.learn-card{text-align:center; padding:1.6rem 1.2rem}
+.word-big{font-size:2.4rem; font-weight:900; line-height:1.15; overflow-wrap:break-word}
+.word-zh{font-size:1.25rem; color:var(--ink2); font-weight:700; margin-top:.2rem}
+.say-row{display:flex; justify-content:center; gap:.7rem; margin:1.1rem 0 .3rem; flex-wrap:wrap}
+.example{background:var(--surface2); border-radius:14px; padding:.8rem .9rem; margin-top:1.1rem; text-align:left; display:flex; gap:.6rem; align-items:flex-start}
+.example .eg-en{font-weight:700}
+.example .eg-zh{color:var(--ink2); font-size:.92rem}
+.hintline{margin-top:.9rem; color:var(--muted); font-weight:700; font-size:.95rem}
+.counter{color:var(--muted); font-weight:800; font-size:.95rem}
+.q-prompt{font-weight:800; color:var(--ink2); font-size:1.05rem}
+.q-word{font-size:2rem; font-weight:900; margin:.3rem 0 .2rem; overflow-wrap:break-word}
+.opts{display:flex; flex-direction:column; gap:.7rem; margin-top:1rem}
+.opt{
+  background:var(--surface); border:2px solid var(--line); border-radius:16px;
+  min-height:3.4rem; padding:.6rem 1rem; font-weight:800; font-size:1.15rem; text-align:center;
+  box-shadow:var(--shadow);
+}
+.opt.right{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
+.opt.wrong{border-color:var(--danger); background:var(--danger-soft); color:var(--danger)}
+.opt:disabled{cursor:default}
+.tilebox{display:flex; flex-wrap:wrap; gap:.5rem; min-height:3.2rem; padding:.6rem; border-radius:14px; background:var(--surface2); margin-top:.9rem; align-items:flex-start}
+.tilebox.answer{background:var(--surface); border:2px dashed var(--line)}
+.tile{background:var(--surface); border:2px solid var(--line); border-radius:12px; padding:.4rem .75rem; font-weight:800; font-size:1.1rem; box-shadow:var(--shadow); min-height:2.75rem}
+.tilebox.answer .tile{border-color:var(--accent)}
+.feedback{
+  position:fixed; left:0; right:0; bottom:0; z-index:50;
+  padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom,0px));
+  border-top-left-radius:22px; border-top-right-radius:22px; box-shadow:0 -6px 24px rgba(0,0,0,.15);
+}
+.feedback .inner{max-width:30rem; margin:0 auto}
+.feedback.good{background:var(--accent-soft)}
+.feedback.bad{background:var(--danger-soft)}
+.feedback .fb-title{font-size:1.25rem; font-weight:900}
+.feedback.good .fb-title{color:var(--accent)}
+.feedback.bad .fb-title{color:var(--danger)}
+.feedback .fb-ans{font-weight:800; margin:.15rem 0 .5rem}
+.fb-btn{min-height:3.25rem; border-radius:16px; width:100%; font-weight:900; font-size:1.15rem}
+.feedback.good .fb-btn{background:var(--accent); color:var(--accent-ink)}
+.feedback.bad .fb-btn{background:var(--danger); color:#fff}
+.done-wrap{text-align:center; padding:2.2rem 0 1rem}
+.done-emoji{font-size:4rem}
+.done-stars{font-size:2.6rem; color:var(--gold); letter-spacing:.1em; margin:.4rem 0}
+.done-stars .off{opacity:.25}
+@keyframes pop{0%{transform:scale(.3); opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1); opacity:1}}
+.done-stars span{display:inline-block; animation:pop .5s ease both}
+.done-stars span:nth-child(2){animation-delay:.15s}
+.done-stars span:nth-child(3){animation-delay:.3s}
+.done-line{font-weight:800; font-size:1.2rem}
+.done-sub{color:var(--ink2); font-weight:700}
+
+/* ---------- progress ---------- */
+.tiles{display:grid; grid-template-columns:repeat(3,1fr); gap:.7rem}
+.tile-stat{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:.75rem .6rem; text-align:center}
+.tile-stat .v{font-size:1.45rem; font-weight:900; line-height:1.15}
+.tile-stat .l{font-size:.8rem; color:var(--ink2); font-weight:700; line-height:1.3}
+.hero-streak{display:flex; align-items:center; gap:1rem; padding:1.1rem 1.2rem}
+.hero-streak .n{font-size:3rem; font-weight:900; line-height:1}
+.chart-readout{font-weight:800; color:var(--ink2); font-size:.98rem; margin-bottom:.4rem}
+.chart-readout b{color:var(--ink)}
+svg text{font-family:inherit}
+.lvl-progress{display:flex; flex-direction:column; gap:.8rem}
+.lvl-progress .nm{font-weight:800; font-size:1rem}
+.lvl-progress .ct{color:var(--muted); font-weight:800; font-size:.88rem; flex:none}
+
+/* ---------- settings ---------- */
+.set-group{display:flex; flex-direction:column; gap:.55rem}
+.set-label{font-weight:800; font-size:1.02rem}
+.set-help{color:var(--ink2); font-size:.9rem; font-weight:600}
+input[type=time]{
+  font:inherit; font-weight:800; font-size:1.2rem; color:var(--ink);
+  background:var(--surface2); border:2px solid var(--line); border-radius:14px;
+  padding:.5rem .8rem; min-height:3.2rem; width:9.5rem;
+}
+.divider{border:none; border-top:1px solid var(--line); margin:.35rem 0}
+.heart{color:var(--danger)}
+
+/* ---------- welcome ---------- */
+.welcome{min-height:82vh; display:flex; flex-direction:column; justify-content:center; gap:1.2rem; text-align:center; padding:1rem 0}
+.welcome .koala{width:5.5rem; height:5.5rem; font-size:3.2rem; margin:0 auto}
+.welcome h1{font-size:1.9rem; font-weight:900}
+.welcome .sub{color:var(--ink2); font-weight:700; font-size:1.1rem}
+.level-pick{display:flex; flex-direction:column; gap:.7rem; text-align:left}
+.wdots{display:flex; gap:.45rem; justify-content:center}
+.wdots i{width:.55rem; height:.55rem; border-radius:50%; background:var(--line)}
+.wdots i.on{background:var(--accent)}
+
+/* ---------- toast ---------- */
+#toast{
+  position:fixed; left:50%; transform:translateX(-50%) translateY(1rem);
+  bottom:calc(6.5rem + env(safe-area-inset-bottom,0px)); z-index:60;
+  background:var(--ink); color:var(--bg); font-weight:800; font-size:1rem;
+  padding:.7rem 1.2rem; border-radius:999px; box-shadow:var(--shadow);
+  opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+  max-width:min(90vw,26rem); text-align:center;
+}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+#toast .zh{display:inline; margin-left:.4em; color:inherit; opacity:.85}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important}
+}
+</style>
+
+<div id="app" aria-live="polite"></div>
+<nav id="tabbar" aria-label="Main">
+  <button data-a="tab:home" id="tab-home"><span class="ico">🏠</span>Today<span class="zh">今天</span></button>
+  <button data-a="tab:levels" id="tab-levels"><span class="ico">📚</span>Lessons<span class="zh">课程</span></button>
+  <button data-a="tab:progress" id="tab-progress"><span class="ico">📈</span>Progress<span class="zh">进度</span></button>
+</nav>
+<div id="toast" role="status"></div>
+
+<script>
+"use strict";
+/* ---------- logo (also used as favicon / home-screen icon) ---------- */
+const LOGO=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Mum's Daily English">
+<defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#23a56a"/><stop offset="1" stop-color="#136b43"/></linearGradient></defs>
+<rect x="0" y="0" width="512" height="512" rx="116" fill="url(#g1)"/>
+<circle cx="140" cy="186" r="78" fill="#c3cbcf"/><circle cx="372" cy="186" r="78" fill="#c3cbcf"/>
+<circle cx="140" cy="186" r="42" fill="#f0c3c9"/><circle cx="372" cy="186" r="42" fill="#f0c3c9"/>
+<circle cx="256" cy="300" r="148" fill="#dde3e6"/>
+<circle cx="176" cy="346" r="15" fill="#f0c3c9" opacity=".85"/><circle cx="336" cy="346" r="15" fill="#f0c3c9" opacity=".85"/>
+<circle cx="206" cy="270" r="15" fill="#2f3437"/><circle cx="306" cy="270" r="15" fill="#2f3437"/>
+<circle cx="211" cy="264" r="5" fill="#fff"/><circle cx="311" cy="264" r="5" fill="#fff"/>
+<ellipse cx="256" cy="330" rx="34" ry="46" fill="#384043"/><ellipse cx="245" cy="312" rx="9" ry="13" fill="#fff" opacity=".25"/>
+<path d="M224 392 Q256 414 288 392" fill="none" stroke="#384043" stroke-width="11" stroke-linecap="round"/>
+<rect x="300" y="46" width="180" height="122" rx="34" fill="#fff"/><path d="M352 158 L330 206 L398 166 Z" fill="#fff"/>
+<text x="390" y="134" text-anchor="middle" font-family="Nunito, Arial, Helvetica, sans-serif" font-size="76" font-weight="800" fill="#157347">Aa</text>
+</svg>`;
+function injectIcons(){
+  try{
+    const head=document.head||document.documentElement;
+    const fav=document.createElement("link");
+    fav.rel="icon"; fav.type="image/svg+xml";
+    fav.href="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(LOGO);
+    head.appendChild(fav);
+    if(/^https?:$/.test(location.protocol)){
+      const a=document.createElement("link");
+      a.rel="apple-touch-icon"; a.setAttribute("sizes","180x180"); a.href="icon-180.png";
+      head.appendChild(a);
+      const m=document.createElement("link");
+      m.rel="manifest"; m.href="manifest.webmanifest";
+      head.appendChild(m);
+    }
+  }catch(e){}
+}
+/* ============================================================
+   COURSE DATA — word: [en, zh, example-en, example-zh]
+   ============================================================ */
+const LEVELS=[
+{id:"l1",name:"Level 1 · Primary",zh:"第一级 · 小学",emoji:"🌱",c:"--l1",
+ desc:"First words for every day",descZh:"最常用的入门单词",
+ units:[
+ {id:"l1u1",name:"Saying Hello",zh:"打招呼",emoji:"👋",words:[
+  ["hello","你好","Hello! Nice to see you.","你好！很高兴见到你。"],
+  ["good morning","早上好","Good morning, Anna!","早上好，安娜！"],
+  ["good night","晚安","Good night. Sleep well.","晚安，睡个好觉。"],
+  ["goodbye","再见","Goodbye! See you tomorrow.","再见！明天见。"],
+  ["please","请","Sit down, please.","请坐。"],
+  ["thank you","谢谢","Thank you for your help.","谢谢你的帮助。"],
+  ["sorry","对不起","Sorry, I am late.","对不起，我迟到了。"],
+  ["excuse me","打扰一下","Excuse me, where is the bus?","打扰一下，公交车在哪里？"],
+  ["yes","是的","Yes, I like tea.","是的，我喜欢茶。"],
+  ["no","不是；不","No, thank you.","不用了，谢谢。"]]},
+ {id:"l1u2",name:"Numbers",zh:"数字",emoji:"🔢",words:[
+  ["one","一","I have one sister.","我有一个妹妹。"],
+  ["two","二","Two cups of tea, please.","请来两杯茶。"],
+  ["three","三","We have three apples.","我们有三个苹果。"],
+  ["four","四","The bus comes at four.","公交车四点来。"],
+  ["five","五","I walk five days a week.","我每周走路五天。"],
+  ["six","六","Dinner is at six.","晚饭六点开始。"],
+  ["seven","七","I get up at seven.","我七点起床。"],
+  ["eight","八","The shop opens at eight.","商店八点开门。"],
+  ["nine","九","Nine people are here.","这里有九个人。"],
+  ["ten","十","Count from one to ten.","从一数到十。"]]},
+ {id:"l1u3",name:"Family",zh:"家人",emoji:"👨‍👩‍👧",words:[
+  ["mother","妈妈","My mother cooks well.","我妈妈做饭很好吃。"],
+  ["father","爸爸","My father likes tea.","我爸爸喜欢喝茶。"],
+  ["son","儿子","Her son works in Sydney.","她儿子在悉尼工作。"],
+  ["daughter","女儿","My daughter calls me every day.","我女儿每天给我打电话。"],
+  ["sister","姐姐；妹妹","My sister lives near me.","我姐姐住在我附近。"],
+  ["brother","哥哥；弟弟","My brother is very tall.","我哥哥很高。"],
+  ["grandmother","奶奶；外婆","Grandmother tells good stories.","奶奶会讲好听的故事。"],
+  ["grandfather","爷爷；外公","Grandfather walks every morning.","爷爷每天早上散步。"],
+  ["husband","丈夫","My husband drives me home.","我丈夫开车送我回家。"],
+  ["grandchild","孙子；孙女","My grandchild is six years old.","我的孙子六岁了。"]]},
+ {id:"l1u4",name:"Food & Drink",zh:"食物饮品",emoji:"🍚",words:[
+  ["rice","米饭","We eat rice every day.","我们每天吃米饭。"],
+  ["water","水","Drink more water.","多喝水。"],
+  ["tea","茶","Would you like some tea?","你想喝点茶吗？"],
+  ["egg","鸡蛋","I eat an egg for breakfast.","我早餐吃一个鸡蛋。"],
+  ["fish","鱼","The fish is very fresh.","这条鱼很新鲜。"],
+  ["apple","苹果","An apple a day is good.","每天一个苹果有益健康。"],
+  ["bread","面包","This bread is soft.","这个面包很软。"],
+  ["milk","牛奶","Warm milk helps me sleep.","热牛奶帮助我睡觉。"],
+  ["chicken","鸡肉","Chicken soup is my favourite.","鸡汤是我的最爱。"],
+  ["vegetables","蔬菜","Eat more vegetables.","多吃蔬菜。"]]},
+ {id:"l1u5",name:"Around the Home",zh:"在家里",emoji:"🏠",words:[
+  ["door","门","Please close the door.","请关门。"],
+  ["window","窗户","Open the window, please.","请打开窗户。"],
+  ["table","桌子","The keys are on the table.","钥匙在桌子上。"],
+  ["chair","椅子","This chair is comfortable.","这把椅子很舒服。"],
+  ["bed","床","I make my bed every morning.","我每天早上整理床铺。"],
+  ["kitchen","厨房","The kitchen is clean.","厨房很干净。"],
+  ["bathroom","卫生间","Where is the bathroom?","卫生间在哪里？"],
+  ["phone","手机；电话","My phone is ringing.","我的手机在响。"],
+  ["key","钥匙","Don't forget your keys.","别忘了你的钥匙。"],
+  ["light","灯","Turn on the light.","请开灯。"]]},
+ {id:"l1u6",name:"Describing Things",zh:"描述事物",emoji:"🎨",words:[
+  ["red","红色","I like the red one.","我喜欢红色的那个。"],
+  ["blue","蓝色","The sky is blue.","天空是蓝色的。"],
+  ["green","绿色","Green vegetables are healthy.","绿色蔬菜很健康。"],
+  ["big","大","This bag is too big.","这个包太大了。"],
+  ["small","小","A small cup of tea, please.","请来一小杯茶。"],
+  ["new","新","I have new shoes.","我有新鞋。"],
+  ["old","旧；老","This is an old photo.","这是一张旧照片。"],
+  ["hot","热","The soup is very hot.","汤很烫。"],
+  ["cold","冷","It is cold today.","今天很冷。"],
+  ["beautiful","漂亮","Your garden is beautiful.","你的花园真漂亮。"]]},
+ {id:"l1u7",name:"Time & Weather",zh:"时间天气",emoji:"☀️",words:[
+  ["today","今天","Today is Monday.","今天是星期一。"],
+  ["tomorrow","明天","See you tomorrow.","明天见。"],
+  ["yesterday","昨天","I was home yesterday.","我昨天在家。"],
+  ["morning","早上","I walk in the morning.","我早上散步。"],
+  ["afternoon","下午","Let's meet in the afternoon.","我们下午见面吧。"],
+  ["night","晚上","The night is quiet.","晚上很安静。"],
+  ["sunny","晴天","It is sunny today.","今天是晴天。"],
+  ["rain","下雨","Take an umbrella, it may rain.","带把伞，可能会下雨。"],
+  ["wind","风","The wind is strong today.","今天风很大。"],
+  ["week","星期；周","I swim twice a week.","我每周游两次泳。"]]}
+]},
+{id:"l2",name:"Level 2 · Middle School",zh:"第二级 · 中学",emoji:"🌿",c:"--l2",
+ desc:"Getting around town",descZh:"出门办事常用语",
+ units:[
+ {id:"l2u1",name:"Shopping",zh:"购物",emoji:"🛒",words:[
+  ["buy","买","I want to buy some fruit.","我想买些水果。"],
+  ["money","钱","I have no money with me.","我身上没带钱。"],
+  ["price","价格","The price is very good.","价格很不错。"],
+  ["cheap","便宜","These apples are cheap.","这些苹果很便宜。"],
+  ["expensive","贵","This bag is too expensive.","这个包太贵了。"],
+  ["shop","商店","The shop opens at nine.","商店九点开门。"],
+  ["pay","付钱","Where do I pay?","在哪里付钱？"],
+  ["cash","现金","I will pay in cash.","我用现金付。"],
+  ["card","银行卡","Can I pay by card?","我可以刷卡吗？"],
+  ["receipt","收据","Can I have a receipt, please?","请给我一张收据好吗？"]]},
+ {id:"l2u2",name:"Getting Around",zh:"出行",emoji:"🚌",words:[
+  ["bus","公交车","The bus is coming.","公交车来了。"],
+  ["train","火车","The train is fast.","火车很快。"],
+  ["station","车站","Meet me at the station.","在车站等我。"],
+  ["ticket","车票","One ticket to the city, please.","请给我一张去市区的票。"],
+  ["left","左边","Turn left at the bank.","在银行那里左转。"],
+  ["right","右边","The shop is on the right.","商店在右边。"],
+  ["straight","直走","Go straight for two blocks.","直走两个街区。"],
+  ["near","近","The park is near my home.","公园离我家很近。"],
+  ["far","远","Is the hospital far?","医院远吗？"],
+  ["stop","车站；停","Get off at the next stop.","在下一站下车。"]]},
+ {id:"l2u3",name:"Seeing the Doctor",zh:"看医生",emoji:"🩺",words:[
+  ["doctor","医生","I need to see a doctor.","我需要看医生。"],
+  ["medicine","药","Take the medicine after food.","饭后吃药。"],
+  ["headache","头疼","I have a headache.","我头疼。"],
+  ["fever","发烧","The child has a fever.","孩子发烧了。"],
+  ["pain","疼痛","I feel pain in my back.","我后背疼。"],
+  ["pharmacy","药店","The pharmacy is next door.","药店就在隔壁。"],
+  ["appointment","预约","I have an appointment at ten.","我十点有预约。"],
+  ["sick","生病","I feel sick today.","我今天不舒服。"],
+  ["better","好转","I feel much better now.","我现在感觉好多了。"],
+  ["rest","休息","You need more rest.","你需要多休息。"]]},
+ {id:"l2u4",name:"Eating Out",zh:"在餐厅",emoji:"🍽️",words:[
+  ["menu","菜单","Can I see the menu?","我可以看看菜单吗？"],
+  ["order","点餐","Are you ready to order?","您准备好点餐了吗？"],
+  ["waiter","服务员","The waiter is very friendly.","服务员很友好。"],
+  ["delicious","好吃","This soup is delicious!","这个汤真好吃！"],
+  ["bill","账单","Can we have the bill, please?","请给我们账单好吗？"],
+  ["cup","杯子","A cup of green tea, please.","请来一杯绿茶。"],
+  ["spicy","辣","Is this dish spicy?","这道菜辣吗？"],
+  ["sweet","甜","The cake is too sweet.","蛋糕太甜了。"],
+  ["takeaway","外卖；打包","Can I get this as takeaway?","这个可以打包吗？"],
+  ["book a table","订位","I would like to book a table for two.","我想订一张两人桌。"]]},
+ {id:"l2u5",name:"Daily Routine",zh:"日常生活",emoji:"⏰",words:[
+  ["wake up","醒来；起床","I wake up at six.","我六点醒来。"],
+  ["breakfast","早餐","Breakfast is ready.","早餐好了。"],
+  ["lunch","午餐","Let's have lunch together.","我们一起吃午饭吧。"],
+  ["dinner","晚餐","Dinner is at seven tonight.","今晚七点吃晚饭。"],
+  ["cook","做饭","I cook for my family.","我给家人做饭。"],
+  ["clean","打扫","I clean the house on Sunday.","我星期天打扫房子。"],
+  ["wash","洗","Wash your hands before dinner.","饭前洗手。"],
+  ["walk","散步","We walk in the park.","我们在公园散步。"],
+  ["sleep","睡觉","I sleep eight hours.","我睡八个小时。"],
+  ["exercise","锻炼","Exercise keeps me healthy.","锻炼让我保持健康。"]]},
+ {id:"l2u6",name:"Feelings",zh:"心情",emoji:"😊",words:[
+  ["happy","开心","I am happy to see you.","见到你我很开心。"],
+  ["sad","难过","Don't be sad.","别难过。"],
+  ["tired","累","I am tired after work.","下班后我很累。"],
+  ["angry","生气","He is angry about the noise.","他因为噪音生气了。"],
+  ["worried","担心","Don't be worried about me.","别为我担心。"],
+  ["excited","兴奋","The kids are excited about the trip.","孩子们对旅行很兴奋。"],
+  ["scared","害怕","The cat is scared of dogs.","猫怕狗。"],
+  ["bored","无聊","I never feel bored in the garden.","在花园里我从不觉得无聊。"],
+  ["surprised","惊讶","I was surprised by the gift.","这份礼物让我很惊讶。"],
+  ["proud","骄傲","I am proud of my daughter.","我为我女儿感到骄傲。"]]}
+]},
+{id:"l3",name:"Level 3 · High School",zh:"第三级 · 高中",emoji:"🌳",c:"--l3",
+ desc:"Real conversations",descZh:"日常对话进阶",
+ units:[
+ {id:"l3u1",name:"Making Plans",zh:"安排计划",emoji:"📅",words:[
+  ["weekend","周末","What are you doing this weekend?","这个周末你做什么？"],
+  ["invite","邀请","They invited us to dinner.","他们邀请我们吃晚饭。"],
+  ["busy","忙","I am busy on Monday.","我星期一很忙。"],
+  ["free","有空","Are you free tomorrow afternoon?","你明天下午有空吗？"],
+  ["meet","见面","Let's meet at the park.","我们在公园见面吧。"],
+  ["maybe","也许","Maybe we can go next week.","也许我们下周可以去。"],
+  ["sure","当然","Sure, that works for me.","当然，我没问题。"],
+  ["later","晚些时候","I will call you later.","我晚点给你打电话。"],
+  ["early","早","Let's leave early today.","我们今天早点出发吧。"],
+  ["late","晚；迟到","Sorry I am late.","对不起我迟到了。"]]},
+ {id:"l3u2",name:"On the Phone",zh:"打电话",emoji:"📞",words:[
+  ["call","打电话","Call me when you arrive.","你到了给我打电话。"],
+  ["message","短信；留言","Send me a message.","给我发个短信。"],
+  ["answer","接听；回答","Nobody answered the phone.","没有人接电话。"],
+  ["hold on","稍等","Hold on a moment, please.","请稍等一下。"],
+  ["speak","说话","May I speak to Mary?","我可以和玛丽通话吗？"],
+  ["repeat","重复","Could you repeat that, please?","您能再说一遍吗？"],
+  ["slowly","慢一点","Please speak slowly.","请说慢一点。"],
+  ["loud","大声","The music is too loud.","音乐太大声了。"],
+  ["wrong number","打错电话","Sorry, you have the wrong number.","对不起，你打错电话了。"],
+  ["video call","视频通话","We video call every Sunday.","我们每个星期天视频通话。"]]},
+ {id:"l3u3",name:"Bank & Post Office",zh:"银行邮局",emoji:"🏦",words:[
+  ["account","账户","I opened a bank account.","我开了一个银行账户。"],
+  ["deposit","存钱","I want to deposit some money.","我想存一些钱。"],
+  ["withdraw","取钱","Can I withdraw cash here?","我可以在这里取现金吗？"],
+  ["send","寄；发送","I want to send this parcel.","我想寄这个包裹。"],
+  ["parcel","包裹","A parcel arrived for you.","有你的一个包裹。"],
+  ["stamp","邮票","Two stamps, please.","请给我两张邮票。"],
+  ["form","表格","Please fill in this form.","请填写这张表格。"],
+  ["sign","签名","Sign here, please.","请在这里签名。"],
+  ["queue","排队","There is a long queue.","排队的人很多。"],
+  ["balance","余额","Can I check my balance?","我可以查一下余额吗？"]]},
+ {id:"l3u4",name:"Work & Study",zh:"工作学习",emoji:"💼",words:[
+  ["job","工作","She found a new job.","她找到了一份新工作。"],
+  ["office","办公室","The office is on level three.","办公室在三楼。"],
+  ["meeting","会议","The meeting starts at ten.","会议十点开始。"],
+  ["boss","老板","My boss is very fair.","我的老板很公正。"],
+  ["colleague","同事","My colleagues are friendly.","我的同事们很友好。"],
+  ["salary","工资","The salary is paid monthly.","工资按月发放。"],
+  ["interview","面试","Good luck with your interview!","祝你面试顺利！"],
+  ["skill","技能","Cooking is a useful skill.","做饭是一项有用的技能。"],
+  ["learn","学习","It is never too late to learn.","学习永远不嫌晚。"],
+  ["practice","练习","Practice English every day.","每天练习英语。"]]},
+ {id:"l3u5",name:"Sharing Opinions",zh:"表达看法",emoji:"💬",words:[
+  ["think","认为","I think this is a good idea.","我认为这是个好主意。"],
+  ["agree","同意","I agree with you.","我同意你的看法。"],
+  ["disagree","不同意","I am afraid I disagree.","恐怕我不同意。"],
+  ["because","因为","I like winter because it is cool.","我喜欢冬天因为很凉快。"],
+  ["however","然而","It is dear; however, it is worth it.","它很贵，然而很值得。"],
+  ["important","重要","Family is the most important thing.","家人是最重要的。"],
+  ["interesting","有趣","That is an interesting story.","那是个有趣的故事。"],
+  ["difficult","难","English is difficult but fun.","英语难但是有趣。"],
+  ["prefer","更喜欢","I prefer tea to coffee.","比起咖啡我更喜欢茶。"],
+  ["understand","明白","Now I understand.","现在我明白了。"]]}
+]},
+{id:"l4",name:"Level 4 · University",zh:"第四级 · 大学",emoji:"🎓",c:"--l4",
+ desc:"Polished, natural English",descZh:"地道流利的表达",
+ units:[
+ {id:"l4u1",name:"Polite & Formal",zh:"正式用语",emoji:"🎩",words:[
+  ["appreciate","感激","I really appreciate your help.","我非常感激你的帮助。"],
+  ["apologise","道歉","I apologise for the delay.","我为延误道歉。"],
+  ["request","请求","I would like to request a refund.","我想申请退款。"],
+  ["confirm","确认","Please confirm the appointment.","请确认预约。"],
+  ["regarding","关于","I am calling regarding my booking.","我打电话是关于我的预订。"],
+  ["assistance","协助","Thank you for your assistance.","感谢您的协助。"],
+  ["available","有空的","Is the doctor available on Friday?","医生星期五有空吗？"],
+  ["schedule","日程安排","My schedule is flexible.","我的日程很灵活。"],
+  ["attach","附上","I will attach the photo.","我会附上照片。"],
+  ["sincerely","真诚地","Yours sincerely, Mei Lin.","您真诚的，美琳。"]]},
+ {id:"l4u2",name:"Everyday Idioms",zh:"日常习语",emoji:"✨",words:[
+  ["no worries","没关系；别客气","— Thank you! — No worries!","——谢谢！——没关系！（澳洲人最常说）"],
+  ["piece of cake","小菜一碟","The test was a piece of cake.","考试太简单了，小菜一碟。"],
+  ["under the weather","不太舒服","I am feeling under the weather.","我觉得有点不舒服。"],
+  ["keep in touch","保持联系","Keep in touch after you move!","搬家后要保持联系！"],
+  ["long time no see","好久不见","Long time no see, my friend!","好久不见，我的朋友！"],
+  ["take your time","慢慢来","No rush, take your time.","不着急，慢慢来。"],
+  ["it's up to you","由你决定","Tea or coffee? It's up to you.","茶还是咖啡？由你决定。"],
+  ["make yourself at home","别拘束","Come in and make yourself at home.","进来吧，别拘束。"],
+  ["fingers crossed","祈祷好运","Fingers crossed for good weather!","希望天气好，祝我们好运！"],
+  ["hang on","等一下","Hang on, I will get my glasses.","等一下，我去拿眼镜。"]]},
+ {id:"l4u3",name:"Bigger Ideas",zh:"抽象词汇",emoji:"🌏",words:[
+  ["culture","文化","Australia has many cultures.","澳大利亚有多元文化。"],
+  ["society","社会","We all live in one society.","我们生活在同一个社会。"],
+  ["environment","环境","Protect the environment.","保护环境。"],
+  ["education","教育","Education changes lives.","教育改变生活。"],
+  ["opportunity","机会","This is a great opportunity.","这是一个很好的机会。"],
+  ["experience","经验；经历","She has years of experience.","她有多年的经验。"],
+  ["decision","决定","It was a hard decision.","那是一个艰难的决定。"],
+  ["responsibility","责任","Health is our own responsibility.","健康是我们自己的责任。"],
+  ["community","社区","Our community is very welcoming.","我们的社区非常友好。"],
+  ["future","未来","The future looks bright.","未来一片光明。"]]},
+ {id:"l4u4",name:"Linking Words",zh:"连接词",emoji:"🔗",words:[
+  ["although","虽然","Although it rained, we enjoyed the trip.","虽然下雨了，我们还是玩得很开心。"],
+  ["therefore","因此","He was ill; therefore he stayed home.","他病了，因此待在家里。"],
+  ["unless","除非","We will walk unless it rains.","除非下雨，否则我们走路去。"],
+  ["whereas","而；然而","I like tea, whereas he likes coffee.","我喜欢茶，而他喜欢咖啡。"],
+  ["eventually","最终","Eventually, she passed the test.","最终，她通过了考试。"],
+  ["particularly","特别是","I love fruit, particularly mangoes.","我爱吃水果，特别是芒果。"],
+  ["fortunately","幸运的是","Fortunately, nobody was hurt.","幸运的是，没有人受伤。"],
+  ["as soon as","一……就","Call me as soon as you arrive.","你一到就给我打电话。"],
+  ["in general","总的来说","In general, the weather is mild.","总的来说，天气很温和。"],
+  ["obviously","显然","Obviously, practice helps a lot.","显然，练习很有帮助。"]]}
+]}];
+
+/* Daily conversations — always unlocked, phrase = the sentence itself */
+const PHRASES={id:"px",name:"Daily Conversations",zh:"日常会话",emoji:"⭐",c:"--lp",
+ desc:"Natural phrases Aussies really use",descZh:"澳洲人每天真正在说的话",
+ units:[
+ {id:"pxu1",name:"Everyday Greetings",zh:"日常问候",emoji:"👋",words:[
+  ["How's it going?","最近怎么样？","— How's it going? — Not bad!","——最近怎么样？——还不错！"],
+  ["How are you going?","你好吗？（澳洲说法）","How are you going today, Mary?","玛丽，你今天好吗？"],
+  ["Not bad.","还不错。","— How are you? — Not bad, thanks!","——你好吗？——还不错，谢谢！"],
+  ["See you later!","回头见！","I am off now. See you later!","我先走了，回头见！"],
+  ["Have a good day!","祝你今天愉快！","Thanks for coming. Have a good day!","谢谢光临，祝你今天愉快！"],
+  ["Long time no see!","好久不见！","Long time no see! How are you?","好久不见！你好吗？"],
+  ["Take care!","保重！","Goodbye, take care!","再见，保重！"],
+  ["All good.","都挺好；没问题。","— Sorry I am late! — All good.","——抱歉我迟到了！——没事儿。"]]},
+ {id:"pxu2",name:"Being Polite",zh:"礼貌用语",emoji:"🙏",words:[
+  ["Excuse me.","打扰一下；借过。","Excuse me, is this seat free?","打扰一下，这个座位有人吗？"],
+  ["No worries.","没关系；别客气。","— Thank you so much! — No worries.","——太感谢了！——别客气。"],
+  ["After you.","您先请。","After you, please.","您先请。"],
+  ["Thanks so much.","非常感谢。","Thanks so much for the lift.","非常感谢你载我一程。"],
+  ["My pleasure.","不客气；我的荣幸。","— Thanks for dinner. — My pleasure!","——谢谢你的晚餐。——不客气！"],
+  ["Never mind.","没关系，别在意。","Never mind, we can try again.","没关系，我们可以再试一次。"],
+  ["Cheers!","谢啦！（澳洲口语）","Cheers for the help, mate!","谢啦，朋友！"],
+  ["Could you please help me?","请问您能帮帮我吗？","Could you please help me with this bag?","请问您能帮我拿一下这个包吗？"]]},
+ {id:"pxu3",name:"At the Shops",zh:"购物会话",emoji:"🛍️",words:[
+  ["How much is this?","这个多少钱？","How much is this, please?","请问这个多少钱？"],
+  ["I'm just looking, thanks.","我只是看看，谢谢。","— Can I help you? — I'm just looking, thanks.","——需要帮忙吗？——我只是看看，谢谢。"],
+  ["Do you have a smaller size?","有小一点的尺码吗？","Do you have a smaller size in blue?","蓝色的有小一点的尺码吗？"],
+  ["Can I pay by card?","可以刷卡吗？","Can I pay by card here?","这里可以刷卡吗？"],
+  ["Where can I find the milk?","牛奶在哪里？","Excuse me, where can I find the milk?","打扰一下，牛奶在哪里？"],
+  ["It's on sale.","正在打折。","Good news, it's on sale this week.","好消息，这周正在打折。"],
+  ["Could I get a bag, please?","请给我一个袋子好吗？","Could I get a bag for these, please?","请给我一个袋子装这些好吗？"],
+  ["Keep the change.","不用找零了。","Here you are. Keep the change.","给你，不用找零了。"]]},
+ {id:"pxu4",name:"At the Doctor",zh:"看医生会话",emoji:"🩺",words:[
+  ["I don't feel well.","我觉得不舒服。","Doctor, I don't feel well today.","医生，我今天觉得不舒服。"],
+  ["I have a headache.","我头疼。","I have a headache and a cough.","我头疼还咳嗽。"],
+  ["Do I need a prescription?","我需要处方吗？","Do I need a prescription for this?","这个药需要处方吗？"],
+  ["I'm allergic to penicillin.","我对青霉素过敏。","Please note I'm allergic to penicillin.","请注意我对青霉素过敏。"],
+  ["Could you speak slowly, please?","请您说慢一点好吗？","Sorry, could you speak slowly, please?","不好意思，请您说慢一点好吗？"],
+  ["I need an interpreter.","我需要翻译。","I need an interpreter, please.","请帮我安排一位翻译。"],
+  ["How long will it take?","需要多长时间？","How long will the test take?","检查需要多长时间？"],
+  ["Thank you, doctor.","谢谢医生。","I feel better. Thank you, doctor.","我好多了，谢谢医生。"]]},
+ {id:"pxu5",name:"Friendly Small Talk",zh:"邻里闲聊",emoji:"🌼",words:[
+  ["Lovely weather today!","今天天气真好！","Lovely weather today, isn't it?","今天天气真好，是吧？"],
+  ["How was your weekend?","你周末过得怎么样？","Morning! How was your weekend?","早上好！你周末过得怎么样？"],
+  ["Do you live around here?","你住在这附近吗？","Do you live around here too?","你也住在这附近吗？"],
+  ["Your garden is beautiful!","你的花园真漂亮！","Your garden is beautiful this spring!","今年春天你的花园真漂亮！"],
+  ["How's the family?","家里人都好吗？","Good to see you! How's the family?","见到你真好！家里人都好吗？"],
+  ["The traffic was terrible.","路上堵死了。","Sorry I am late, the traffic was terrible.","抱歉来晚了，路上堵死了。"],
+  ["Enjoy the rest of your day!","祝你今天愉快！","Lovely to chat. Enjoy the rest of your day!","聊得很开心，祝你今天愉快！"],
+  ["Catch up soon!","回头聚聚！","Great to see you. Catch up soon!","见到你真好，回头聚聚！"]]},
+ {id:"pxu6",name:"Asking for Help",zh:"寻求帮助",emoji:"🆘",words:[
+  ["Could you help me, please?","请问您能帮帮我吗？","Could you help me, please? I can't reach it.","请问您能帮帮我吗？我够不着。"],
+  ["I'm lost.","我迷路了。","Excuse me, I'm lost. Where is the station?","打扰一下，我迷路了。车站在哪里？"],
+  ["Where is the toilet?","洗手间在哪里？","Excuse me, where is the toilet?","打扰一下，洗手间在哪里？"],
+  ["Can you say that again?","您能再说一遍吗？","Sorry, can you say that again?","不好意思，您能再说一遍吗？"],
+  ["I don't understand.","我不明白。","I don't understand. Please speak slowly.","我不明白，请说慢一点。"],
+  ["Do you speak Chinese?","你会说中文吗？","Excuse me, do you speak Chinese?","请问你会说中文吗？"],
+  ["Please write it down.","请写下来。","Please write it down for me.","请帮我写下来。"],
+  ["Thanks for your help!","谢谢你的帮助！","Thanks so much for your help!","非常感谢你的帮助！"]]}
+]};
+
+const ALL_LEVELS=[...LEVELS,PHRASES];
+const WORD={};       // id -> {en,zh,eg,egZh,unit}
+const UNIT={};       // id -> unit (+level ref)
+ALL_LEVELS.forEach(L=>L.units.forEach(u=>{u.level=L; UNIT[u.id]=u;
+  u.words.forEach((w,i)=>{WORD[u.id+":"+i]={id:u.id+":"+i,en:w[0],zh:w[1],eg:w[2],egZh:w[3],unit:u};});
+}));
+const PHRASE_LIST=PHRASES.units.flatMap(u=>u.words.map((w,i)=>u.id+":"+i));
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const KEY="mumsDailyEnglish.v1";
+const DEFAULTS={set:{zh:1,sound:1,big:0,goal:10,rate:.9,level:"l1",remind:"09:00"},
+  first:1, words:{}, units:{}, days:{}, created:""};
+const clone=o=>JSON.parse(JSON.stringify(o));
+let S=load();
+function load(){
+  try{const raw=localStorage.getItem(KEY); if(raw){const s=JSON.parse(raw);
+    return {...clone(DEFAULTS),...s,set:{...DEFAULTS.set,...(s.set||{})}};}}catch(e){}
+  return clone(DEFAULTS);
+}
+let saveT=null;
+function save(){clearTimeout(saveT); saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}},400);}
+
+const UI={screen:"home",tab:"home",level:null,wstep:0,chartSel:6,confirmReset:0};
+let L=null; // live lesson
+
+/* ---------- date helpers ---------- */
+function ymd(d){d=d||new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function today(){return ymd();}
+function day(off){const d=new Date(); d.setDate(d.getDate()+off); return d;}
+function dayRec(k){k=k||today(); if(!S.days[k])S.days[k]={s:0,w:0,l:0,r:0}; return S.days[k];}
+const WD_EN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const WD_ZH=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+const MO_EN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");}
+
+/* ---------- streak / stats ---------- */
+function isActive(r){return !!r && ((r.l||0)+(r.r||0)>0 || (r.s||0)>=180);}
+function streak(){
+  const doneToday=isActive(S.days[today()]);
+  let n=0,d=new Date(); d.setDate(d.getDate()-1);
+  while(isActive(S.days[ymd(d)])){n++; d.setDate(d.getDate()-1);}
+  return {n:doneToday?n+1:n, doneToday};
+}
+function wordsLearned(){return Object.keys(S.words).length;}
+function lessonsDone(){return Object.values(S.units).filter(u=>u.done).length;}
+function totalMin(){return Math.round(Object.values(S.days).reduce((a,r)=>a+(r.s||0),0)/60);}
+function dueWords(){const t=today(); return Object.keys(S.words).filter(id=>S.words[id].due<=t && WORD[id]);}
+function unitDone(id){return !!(S.units[id]&&S.units[id].done);}
+function unitUnlocked(u){
+  if(u.level.id==="px")return true;
+  const i=u.level.units.indexOf(u);
+  return i===0 || unitDone(u.level.units[i-1].id);
+}
+function levelPct(L){const d=L.units.filter(u=>unitDone(u.id)).length; return {d,n:L.units.length,pct:Math.round(d/L.units.length*100)};}
+function nextUnit(){
+  const start=ALL_LEVELS.findIndex(l=>l.id===S.set.level);
+  const order=[...LEVELS.slice(Math.max(0,start)),...LEVELS.slice(0,Math.max(0,start))];
+  for(const l of order){for(const u of l.units){if(!unitDone(u.id))return u;}}
+  for(const u of PHRASES.units){if(!unitDone(u.id))return u;}
+  return null;
+}
+
+/* ---------- audio: speech + feedback sounds ---------- */
+const synth=window.speechSynthesis||null;
+let VOICE=null,voiceTried=0;
+function pickVoice(){
+  if(!synth)return null;
+  const vs=synth.getVoices(); if(!vs.length)return null;
+  const en=vs.filter(v=>/^en[-_]/i.test(v.lang)||v.lang==="en");
+  const pref=["en-AU","en-GB","en-US"];
+  for(const p of pref){const hit=en.find(v=>v.lang.replace("_","-").startsWith(p)); if(hit)return hit;}
+  return en[0]||null;
+}
+if(synth)synth.addEventListener?.("voiceschanged",()=>{VOICE=pickVoice();});
+function speak(text,rate){
+  if(!synth||!text)return;
+  try{
+    synth.cancel();
+    if(!VOICE&&voiceTried<20){VOICE=pickVoice();voiceTried++;}
+    const u=new SpeechSynthesisUtterance(text.replace(/—/g,", "));
+    u.lang=VOICE?VOICE.lang:"en-AU"; if(VOICE)u.voice=VOICE;
+    u.rate=rate||S.set.rate; u.pitch=1;
+    synth.speak(u);
+  }catch(e){}
+}
+let AC=null;
+function ding(ok){
+  if(!S.set.sound)return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const t=AC.currentTime;
+    const notes=ok?[[660,0,.09],[990,.1,.16]]:[[220,0,.22]];
+    notes.forEach(([f,off,durr])=>{
+      const o=AC.createOscillator(),g=AC.createGain();
+      o.type="sine"; o.frequency.value=f;
+      g.gain.setValueAtTime(.0001,t+off); g.gain.exponentialRampToValueAtTime(.12,t+off+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,t+off+durr);
+      o.connect(g).connect(AC.destination); o.start(t+off); o.stop(t+off+durr+.02);
+    });
+  }catch(e){}
+}
+
+/* ---------- toast ---------- */
+let toastT=null;
+function toast(html){
+  const el=document.getElementById("toast");
+  el.innerHTML=html; el.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),3200);
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+const app=document.getElementById("app");
+function setBodyFlags(){
+  document.body.classList.toggle("nozh",!S.set.zh);
+  document.body.classList.toggle("nosound",!synth);
+  const inLesson=UI.screen==="lesson"||UI.screen==="review"||UI.screen==="welcome";
+  document.body.classList.toggle("nonav",inLesson);
+  document.documentElement.style.fontSize=S.set.big?"18.5px":"16px";
+}
+function render(){
+  setBodyFlags();
+  ["home","levels","progress"].forEach(t=>{
+    const b=document.getElementById("tab-"+t);
+    if(b)b.classList.toggle("on",UI.tab===t&&UI.screen!=="welcome");
+  });
+  const r={welcome:rWelcome,home:rHome,levels:rLevels,units:rUnits,lesson:rLesson,review:rLesson,progress:rProgress,settings:rSettings}[UI.screen]||rHome;
+  app.innerHTML=r();
+  window.scrollTo(0,0);
+  afterRender();
+}
+function afterRender(){
+  if((UI.screen==="lesson"||UI.screen==="review")&&L){
+    if(L.stage==="learn"&&S.set.sound){const w=L.words[L.i]; setTimeout(()=>speak(w.en),250);}
+    if(L.stage==="quiz"&&!L.q.answered){const q=L.q.qs[L.q.qi];
+      if(q.t==="listen"&&S.set.sound)setTimeout(()=>speak(q.w.en),300);
+      if(q.t==="enzh"&&S.set.sound)setTimeout(()=>speak(q.w.en),300);
+    }
+  }
+}
+function T(en,zh){return en+'<span class="zh">'+zh+'</span>';}
+
+/* ---------- welcome ---------- */
+function rWelcome(){
+  const s=UI.wstep;
+  let body="";
+  if(s===0)body=`
+    <div class="koala logo">${LOGO}</div>
+    <h1>Welcome!<span class="zh">欢迎！</span></h1>
+    <p class="sub">Learn English a little every day —<br>words, sentences and real Aussie phrases.
+      <span class="zh">每天学一点英语——单词、句子和地道的澳洲日常用语。</span></p>
+    <button class="btn btn-primary" data-a="w:1">${T("Let's start","开始吧")}</button>`;
+  if(s===1)body=`
+    <h1>Where shall we begin?<span class="zh">从哪里开始？</span></h1>
+    <p class="sub">You can change this anytime.<span class="zh">以后随时可以更改。</span></p>
+    <div class="level-pick">
+      ${LEVELS.map(l=>`
+      <button class="level-card" style="--lc:var(${l.c})" data-a="wlevel:${l.id}">
+        <span class="level-emoji">${l.emoji}</span>
+        <span class="grow">
+          <span class="level-name">${l.name}<span class="zh">${l.zh}</span></span>
+          <span class="level-desc">${l.desc}<span class="zh inline">${l.descZh}</span></span>
+        </span>
+      </button>`).join("")}
+    </div>
+    <p class="sub" style="font-size:.95rem">Not sure? Start with Level 1 — it never hurts to warm up.
+      <span class="zh">不确定？就从第一级开始，热热身没坏处。</span></p>`;
+  if(s===2)body=`
+    <div class="koala">⏱️</div>
+    <h1>Your daily goal<span class="zh">每日目标</span></h1>
+    <p class="sub">A few minutes a day beats one long day a week.
+      <span class="zh">每天几分钟，胜过一周一次学很久。</span></p>
+    <div class="chip-group" style="justify-content:center">
+      ${[5,10,15,20].map(g=>`<button class="chip ${S.set.goal===g?"on":""}" data-a="wgoal:${g}">${g} min<span class="zh">分钟</span></button>`).join("")}
+    </div>
+    <button class="btn btn-primary" data-a="w:done">${T("Start learning","开始学习")} 🎉</button>`;
+  return `<div class="welcome">${body}
+    <div class="wdots">${[0,1,2].map(i=>`<i class="${i<=s?"on":""}"></i>`).join("")}</div>
+  </div>`;
+}
+
+/* ---------- home ---------- */
+function rHome(){
+  const st=streak();
+  const d=new Date();
+  const rec=dayRec();
+  const min=Math.floor((rec.s||0)/60);
+  const pct=Math.min(1,min/S.set.goal);
+  const due=dueWords().length;
+  const nu=nextUnit();
+  const pid=PHRASE_LIST[Math.floor(Date.now()/864e5)%PHRASE_LIST.length];
+  const pod=WORD[pid];
+  const R=16,C=2*Math.PI*R;
+  const ring=`<svg class="ring" width="52" height="52" viewBox="0 0 44 44" aria-hidden="true">
+    <circle cx="22" cy="22" r="${R}" fill="none" stroke="var(--surface2)" stroke-width="6"/>
+    <circle cx="22" cy="22" r="${R}" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round"
+      stroke-dasharray="${(C*pct).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 22 22)"/>
+    <text x="22" y="26" text-anchor="middle" font-size="12" font-weight="800" fill="var(--ink)">${min}</text>
+  </svg>`;
+  return `
+  <div class="hello">
+    <div class="koala logo">${LOGO}</div>
+    <div class="grow">
+      <h1>G'day!<span class="zh inline">你好！</span></h1>
+      <div class="date">${WD_EN[d.getDay()]}, ${d.getDate()} ${MO_EN[d.getMonth()]}<span class="zh inline">${WD_ZH[d.getDay()]}</span></div>
+    </div>
+    <button class="backbtn" data-a="settings" aria-label="Settings 设置">⚙️ <span>${T("Settings","设置")}</span></button>
+  </div>
+  <div class="stack">
+    <div class="statrow">
+      <div class="card"><span class="flame">🔥</span><div>
+        <div class="stat-big">${st.n}</div>
+        <div class="stat-lab">${st.doneToday?T("day streak!","连续学习天数！"):T("day streak — practise today to keep it","连续天数——今天练习保持连胜")}</div>
+      </div></div>
+      <div class="card">${ring}<div>
+        <div class="stat-big">${min}<span style="font-size:.9rem">/${S.set.goal}</span></div>
+        <div class="stat-lab">${T("minutes today","今日分钟数")}</div>
+      </div></div>
+    </div>
+    ${nu?`
+    <button class="continue-card" data-a="start:${nu.id}">
+      <div class="eyebrow">${st.doneToday?"Keep going · 继续加油":"Today's lesson · 今天的课程"}</div>
+      <div class="big">${nu.emoji} ${nu.name}<span class="zh">${nu.zh}</span></div>
+      <div class="sub">${nu.level.name}<span class="zh inline">${nu.level.zh}</span></div>
+      <div class="go">${st.doneToday?"Learn more ➜":"Start ➜"}<span class="zh inline">${st.doneToday?"再学一课":"开始"}</span></div>
+    </button>`:`
+    <div class="card" style="text-align:center">
+      <div style="font-size:2.2rem">🏆</div>
+      <div class="done-line">${T("You finished every lesson!","你完成了所有课程！")}</div>
+      <div class="done-sub">${T("Keep your words fresh with daily reviews.","每天复习，保持记忆。")}</div>
+    </div>`}
+    ${due>0?`
+    <button class="btn btn-gold" data-a="review">🔁 ${T(`Review ${due} word${due>1?"s":""}`,`复习 ${due} 个单词`)}</button>`:""}
+    <div class="card pod-card">
+      <div class="eyebrow">Phrase of the day · 每日一句</div>
+      <div class="phrase-en">${pod.en}</div>
+      <div class="phrase-zh zh">${pod.zh}</div>
+      <div class="row" style="margin-top:.7rem">
+        <button class="speak-btn sndonly" data-a="say" data-say="${esc(pod.en)}">🔊 ${T("Hear it","听一听")}</button>
+        <button class="speak-btn sndonly small" data-a="say-slow" data-say="${esc(pod.en)}">🐢 ${T("Slow","慢速")}</button>
+        <span class="grow"></span>
+        <button class="linkbtn" data-a="openlevel:px">${T("More ➜","更多")}</button>
+      </div>
+    </div>
+    ${!S.set.remindSet?`
+    <div class="nudge">
+      <div style="font-size:1.5rem">⏰</div>
+      <div class="grow">
+        <div class="t">${T("Want a daily reminder?","需要每日提醒吗？")}</div>
+        <div class="set-help">${T("Set up a daily nudge so practice becomes a habit.","设置每日提醒，让学习成为习惯。")}</div>
+        <button class="linkbtn" data-a="settings">${T("Set it up ➜","去设置")}</button>
+      </div>
+    </div>`:""}
+  </div>`;
+}
+
+/* ---------- levels ---------- */
+function rLevels(){
+  const p=PHRASES, pp=levelPct(p);
+  return `
+  <div class="topbar"><div class="screen-title">${T("Lessons","课程")}</div></div>
+  <div class="stack">
+    <button class="level-card" style="--lc:var(${p.c})" data-a="openlevel:px">
+      <span class="level-emoji">${p.emoji}</span>
+      <span class="grow">
+        <span class="level-name">${p.name}<span class="zh">${p.zh}</span></span>
+        <span class="level-desc">${p.desc}<span class="zh inline">${p.descZh}</span></span>
+        <span class="meter"><i style="width:${pp.pct}%"></i></span>
+      </span>
+      <span class="level-count">${pp.d}/${pp.n}</span>
+    </button>
+    ${LEVELS.map(l=>{const lp=levelPct(l); return `
+    <button class="level-card" style="--lc:var(${l.c})" data-a="openlevel:${l.id}">
+      <span class="level-emoji">${l.emoji}</span>
+      <span class="grow">
+        <span class="level-name">${l.name}<span class="zh">${l.zh}</span></span>
+        <span class="level-desc">${l.desc}<span class="zh inline">${l.descZh}</span></span>
+        <span class="meter"><i style="width:${lp.pct}%"></i></span>
+      </span>
+      <span class="level-count">${lp.d}/${lp.n}</span>
+    </button>`;}).join("")}
+  </div>`;
+}
+function rUnits(){
+  const l=ALL_LEVELS.find(x=>x.id===UI.level)||LEVELS[0];
+  return `
+  <div class="topbar">
+    <button class="backbtn" data-a="tab:levels">‹ ${T("Back","返回")}</button>
+    <div class="screen-title" style="color:var(${l.c})">${l.emoji} ${l.name}<span class="zh">${l.zh}</span></div>
+  </div>
+  <div class="stack">
+    ${l.units.map((u,i)=>{
+      const rec=S.units[u.id], open=unitUnlocked(u);
+      const state=rec&&rec.done
+        ?`<span class="stars">${"★".repeat(rec.stars)}${"☆".repeat(3-rec.stars)}</span>`
+        :(open?`<span style="color:var(--accent)">${i===0||l.id==="px"?"Start":"Next"} ➜</span>`:"🔒");
+      return `
+      <button class="unit-row" data-a="start:${u.id}" ${open?"":"disabled"}>
+        <span class="unit-emoji">${u.emoji}</span>
+        <span class="grow">
+          <span class="unit-name">${u.name}<span class="zh">${u.zh}</span></span>
+          <span class="set-help">${u.words.length} ${l.id==="px"?"phrases":"words"}<span class="zh inline">${u.words.length} ${l.id==="px"?"个句子":"个单词"}</span></span>
+        </span>
+        <span class="unit-state">${state}</span>
+      </button>`;}).join("")}
+  </div>`;
+}
+
+/* ============================================================
+   LESSON ENGINE
+   ============================================================ */
+function shuffle(a){a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
+function startLesson(unitId){
+  const u=UNIT[unitId]; if(!u)return;
+  L={unit:u, words:u.words.map((w,i)=>WORD[u.id+":"+i]), i:0, stage:"learn", review:false};
+  UI.screen="lesson"; render();
+}
+function startReview(){
+  const ids=shuffle(dueWords()).slice(0,15);
+  if(!ids.length)return;
+  const words=ids.map(id=>WORD[id]);
+  L={unit:null, words, i:0, stage:"quiz", review:true, q:makeQuiz(words,true)};
+  UI.screen="review"; render();
+}
+function makeQuiz(words,isReview){
+  const pick=shuffle(words).slice(0,Math.min(isReview?15:8,words.length));
+  const types=isReview?["enzh","zhen","listen"]:["enzh","listen","zhen","build","enzh","listen","build","zhen"];
+  const qs=pick.map((w,i)=>{
+    let t=types[i%types.length];
+    const target=w.unit.level.id==="px"?w.en:w.eg;
+    const tokens=target.split(" ");
+    if(t==="build"&&(tokens.length<3||tokens.length>8||/—/.test(target)))t="enzh";
+    if(!synth&&t==="listen")t="enzh";
+    return {t,w,target};
+  });
+  return {qs,qi:0,right:0,wrong:0,answered:false,retry:[],retried:0,built:[],pool:[],fb:null};
+}
+function options(q){
+  const isZh=q.t==="enzh";
+  const val=w=>isZh?w.zh:w.en;
+  const pool=shuffle(Object.values(WORD).filter(x=>x.id!==q.w.id));
+  const sameUnit=pool.filter(x=>x.unit===q.w.unit);
+  const opts=[q.w];
+  for(const src of [sameUnit,pool]){
+    for(const c of src){
+      if(opts.length>=4)break;
+      if(!opts.some(o=>val(o)===val(c)))opts.push(c);
+    }
+  }
+  return shuffle(opts).map(o=>({txt:val(o),ok:o===q.w}));
+}
+function rLesson(){
+  if(!L)return rHome();
+  if(L.stage==="learn")return rLearn();
+  if(L.stage==="quiz")return rQuiz();
+  return rDone();
+}
+function lessonTop(pct){
+  return `<div class="lesson-top">
+    <button class="exitbtn" data-a="exit" aria-label="Exit 退出">✕</button>
+    <div class="pbar"><i style="width:${Math.round(pct*100)}%"></i></div>
+  </div>`;
+}
+function rLearn(){
+  const w=L.words[L.i], n=L.words.length, isPhrase=w.unit.level.id==="px";
+  return lessonTop((L.i)/(n+1))+`
+  <div class="counter" style="text-align:center;margin-bottom:.6rem">
+    ${isPhrase?"Phrase":"Word"} ${L.i+1} of ${n}<span class="zh inline">第 ${L.i+1} 个，共 ${n} 个</span>
+  </div>
+  <div class="card learn-card">
+    <div class="word-big">${w.en}</div>
+    <div class="word-zh zh">${w.zh}</div>
+    <div class="say-row">
+      <button class="speak-btn sndonly" data-a="say" data-say="${esc(w.en)}">🔊 ${T("Hear it","听一听")}</button>
+      <button class="speak-btn sndonly gold" data-a="say-slow" data-say="${esc(w.en)}">🐢 ${T("Slow","慢速")}</button>
+    </div>
+    <div class="example">
+      <button class="speak-btn sndonly small" data-a="say" data-say="${esc(w.eg)}" aria-label="Hear the sentence">🔊</button>
+      <div class="grow">
+        <div class="eg-en">${w.eg}</div>
+        <div class="eg-zh zh">${w.egZh}</div>
+      </div>
+    </div>
+    <div class="hintline">🗣️ ${T("Say it out loud!","大声跟读！")}</div>
+  </div>
+  <div class="stack" style="margin-top:1rem">
+    <button class="btn btn-primary" data-a="learn:next">${L.i+1<n?T("Next","下一个"):T("Practise what you learned ➜","开始练习")}</button>
+    ${L.i>0?`<button class="btn btn-plain" data-a="learn:prev">${T("‹ Previous","上一个")}</button>`:""}
+  </div>`;
+}
+function rQuiz(){
+  const Q=L.q,q=Q.qs[Q.qi],total=Q.qs.length+Q.retry.length;
+  const pct=(Q.qi)/(Q.qs.length||1);
+  let body="";
+  const prompts={enzh:["What does this mean?","这是什么意思？"],zhen:["Which English word is this?","是哪个英文单词？"],listen:["What do you hear?","你听到了什么？"],build:["Put the sentence in order","把句子排好顺序"]};
+  const P=prompts[q.t];
+  if(q.t==="enzh"||q.t==="zhen"||q.t==="listen"){
+    if(!q.opts)q.opts=options(q);
+    let head="";
+    if(q.t==="enzh")head=`<div class="q-word">${q.w.en}</div>
+      <button class="speak-btn sndonly small" data-a="say" data-say="${esc(q.w.en)}">🔊 ${T("Hear it","听")}</button>`;
+    if(q.t==="zhen")head=`<div class="q-word">${q.w.zh}</div>`;
+    if(q.t==="listen")head=`<div class="say-row" style="margin:.4rem 0">
+      <button class="speak-btn" data-a="say" data-say="${esc(q.w.en)}">🔊 ${T("Play again","再听一遍")}</button>
+      <button class="speak-btn gold" data-a="say-slow" data-say="${esc(q.w.en)}">🐢 ${T("Slow","慢速")}</button></div>`;
+    body=`${head}<div class="opts">
+      ${q.opts.map((o,i)=>{
+        let cls="opt";
+        if(Q.answered){if(o.ok)cls+=" right"; else if(Q.pickedI===i)cls+=" wrong";}
+        return `<button class="${cls}" data-a="ans:${i}" ${Q.answered?"disabled":""}>${o.txt}</button>`;
+      }).join("")}
+    </div>`;
+  }else{ // build
+    if(!q.tiles){q.tokens=q.target.split(" "); q.tiles=shuffle(q.tokens.map((t,i)=>({t,i})));
+      if(q.tiles.map(x=>x.t).join(" ")===q.target)q.tiles.reverse();
+      Q.built=[];}
+    body=`
+    <div class="card" style="padding:.8rem 1rem; margin-top:.6rem">
+      <div class="eg-zh">${q.w.unit.level.id==="px"?q.w.zh:q.w.egZh}</div>
+    </div>
+    <div class="tilebox answer" aria-label="Your sentence">${Q.built.map((b,i)=>`<button class="tile" data-a="untile:${i}">${b.t}</button>`).join("")||`<span class="set-help">${T("Tap the words below in order","按顺序点下面的单词")}</span>`}</div>
+    <div class="tilebox">${q.tiles.map((b,i)=>Q.built.includes(b)?"":`<button class="tile" data-a="tile:${i}">${b.t}</button>`).join("")}</div>`;
+  }
+  const fb=Q.fb?`
+  <div class="feedback ${Q.fb.ok?"good":"bad"}"><div class="inner">
+    <div class="fb-title">${Q.fb.ok?T("Correct! 🎉","答对了！"):T("Not quite","再接再厉")}</div>
+    ${Q.fb.ok?"":`<div class="fb-ans">${T("Answer","正确答案")}: ${Q.fb.ans}
+      <button class="speak-btn sndonly small" data-a="say" data-say="${esc(Q.fb.say)}">🔊</button></div>`}
+    <button class="fb-btn" data-a="cont">${T("Continue","继续")}</button>
+  </div></div>`:"";
+  return lessonTop(L.review?pct:(L.words.length? (L.words.length+Q.qi)/(L.words.length+Q.qs.length):pct))+`
+  <div class="counter" style="text-align:center;margin-bottom:.4rem">${T(`Question ${Q.qi+1} of ${total}`,`第 ${Q.qi+1} 题，共 ${total} 题`)}</div>
+  <div style="text-align:center"><div class="q-prompt">${P[0]}<span class="zh">${P[1]}</span></div>${body}</div>
+  ${fb}
+  <div style="height:9rem"></div>`;
+}
+function answer(ok,q){
+  const Q=L&&L.q; if(!Q||Q.answered)return;
+  if(Q.qs[Q.qi]!==q)return;
+  Q.answered=true;
+  if(ok){Q.right++;}else{Q.wrong++; if(!L.review&&!q.isRetry&&Q.retried<6){const copy={...q,opts:null,tiles:null,isRetry:true}; Q.retry.push(copy); Q.retried++;}}
+  ding(ok);
+  if(!ok&&S.set.sound)setTimeout(()=>speak(q.t==="build"?q.target:q.w.en,.85),350);
+  applySRS(q.w.id,ok);
+  const ansTxt=q.t==="enzh"?q.w.zh:(q.t==="build"?q.target:q.w.en);
+  Q.fb={ok,ans:ansTxt,say:q.t==="enzh"?q.w.en:(q.t==="build"?q.target:q.w.en)};
+  render();
+}
+function continueQuiz(){
+  const Q=L.q;
+  Q.answered=false; Q.fb=null; Q.pickedI=null; Q.built=[];
+  Q.qi++;
+  if(Q.qi>=Q.qs.length){
+    if(Q.retry.length){Q.qs.push(...Q.retry.splice(0));}
+  }
+  if(Q.qi>=Q.qs.length){finishLesson();return;}
+  render();
+}
+function applySRS(id,ok){
+  const t=today();
+  const INT=[1,1,3,7,14,30,60];
+  let w=S.words[id];
+  if(!w){w=S.words[id]={b:1,due:""};}
+  if(L.review){
+    w.b=ok?Math.min(w.b+1,6):1;
+  }else{
+    if(!ok)w.b=1;
+  }
+  const d=day(INT[w.b]||1);
+  w.due=ymd(d);
+  save();
+}
+function finishLesson(){
+  const Q=L.q;
+  const total=Q.right+Q.wrong;
+  const acc=total?Q.right/total:1;
+  L.acc=acc; L.stage="done";
+  const rec=dayRec();
+  if(L.review){
+    rec.r+=total;
+  }else{
+    const u=L.unit;
+    L.words.forEach(w=>{if(!S.words[w.id]){S.words[w.id]={b:1,due:ymd(day(1))};}});
+    const stars=acc>=.9?3:acc>=.65?2:1;
+    const old=S.units[u.id]||{};
+    S.units[u.id]={done:1,stars:Math.max(stars,old.stars||0)};
+    rec.l+=1; rec.w+=L.words.length;
+    L.stars=stars;
+  }
+  save(); render();
+}
+function rDone(){
+  const st=streak();
+  const isR=L.review;
+  const nu=nextUnit();
+  return `
+  <div class="done-wrap">
+    <div class="done-emoji">${isR?"🧠":"🎉"}</div>
+    ${isR?"":`<div class="done-stars">
+      ${[1,2,3].map(i=>`<span class="${i<=L.stars?"":"off"}">★</span>`).join("")}
+    </div>`}
+    <div class="done-line">${isR?T("Review complete!","复习完成！"):T("Lesson complete!","课程完成！")}</div>
+    <div class="done-sub">${T(`You got ${L.q.right} of ${L.q.right+L.q.wrong} right`,`答对 ${L.q.right} 题，共 ${L.q.right+L.q.wrong} 题`)}
+      ${isR?"":"<br>"+T(`+${L.words.length} words practised`,`练习了 ${L.words.length} 个单词`)}</div>
+    <div class="done-sub" style="margin-top:.5rem">🔥 ${st.n} ${T("day streak","天连续学习")}</div>
+  </div>
+  <div class="stack">
+    ${!isR&&nu?`<button class="btn btn-primary" data-a="start:${nu.id}">${T("Next lesson ➜","下一课")}</button>`:""}
+    <button class="btn ${isR||!nu?"btn-primary":"btn-soft"}" data-a="tab:home">${T("Back to Today","回到今天")}</button>
+  </div>`;
+}
+function exitLesson(){
+  const lvl=L&&L.unit?L.unit.level.id:null;
+  L=null;
+  if(lvl){UI.screen="units"; UI.level=lvl; UI.tab="levels";}
+  else {UI.screen="home"; UI.tab="home";}
+  render();
+}
+
+/* ============================================================
+   PROGRESS
+   ============================================================ */
+function chartSVG(){
+  const days=[]; for(let i=6;i>=0;i--){const d=day(-i); const r=S.days[ymd(d)]||{};
+    days.push({d,min:Math.round((r.s||0)/60),w:(r.w||0)+(r.r||0)});}
+  const goal=S.set.goal;
+  const maxV=Math.max(goal,...days.map(x=>x.min));
+  const nice=[10,15,20,30,45,60,90,120,180,240].find(n=>n>=maxV)||Math.ceil(maxV/60)*60;
+  const W=340,H=168,padL=30,padR=10,top=16,base=126;
+  const plotW=W-padL-padR, slot=plotW/7, bw=22;
+  const y=v=>base-(v/nice)*(base-top);
+  let bars="",labels="",hits="";
+  days.forEach((x,i)=>{
+    const cx=padL+slot*i+slot/2, bx=cx-bw/2;
+    const h=Math.max(x.min>0?6:4,base-y(x.min));
+    const by=base-h;
+    const isToday=i===6, sel=UI.chartSel===i;
+    const fill=x.min>0?(isToday?"var(--accent)":"var(--bar)"):"var(--surface2)";
+    const r=4;
+    bars+=`<path d="M${bx} ${base} L${bx} ${by+r} Q${bx} ${by} ${bx+r} ${by} L${bx+bw-r} ${by} Q${bx+bw} ${by} ${bx+bw} ${by+r} L${bx+bw} ${base} Z" fill="${fill}" ${sel?'stroke="var(--ink)" stroke-width="1.5"':""}/>`;
+    if(isToday&&x.min>0)labels+=`<text x="${cx}" y="${by-6}" text-anchor="middle" font-size="11" font-weight="800" fill="var(--ink)">${x.min}</text>`;
+    const wd=x.d.getDay();
+    labels+=`<text x="${cx}" y="${base+16}" text-anchor="middle" font-size="11" font-weight="${isToday?"800":"700"}" fill="${isToday?"var(--ink)":"var(--muted)"}">${WD_EN[wd].slice(0,3)}</text>`;
+    if(S.set.zh)labels+=`<text x="${cx}" y="${base+31}" text-anchor="middle" font-size="10" fill="var(--muted)">${WD_ZH[wd].slice(2)}</text>`;
+    hits+=`<rect x="${padL+slot*i}" y="${top-10}" width="${slot}" height="${base-top+24}" fill="transparent" data-a="bar:${i}" style="cursor:pointer"/>`;
+  });
+  const gy=y(goal);
+  const sel=days[UI.chartSel]||days[6];
+  const selWd=sel.d.getDay();
+  return `
+  <div class="chart-readout">${UI.chartSel===6?"Today":WD_EN[selWd]}<span class="zh inline">${UI.chartSel===6?"今天":WD_ZH[selWd]}</span> ·
+    <b>${sel.min} min</b><span class="zh inline">分钟</span> · <b>${sel.w}</b> ${T2("words practised","练习单词")}</div>
+  <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Minutes practised in the last 7 days">
+    <line x1="${padL}" y1="${y(nice)}" x2="${W-padR}" y2="${y(nice)}" stroke="var(--line)" stroke-width="1"/>
+    <line x1="${padL}" y1="${y(nice/2)}" x2="${W-padR}" y2="${y(nice/2)}" stroke="var(--line)" stroke-width="1"/>
+    <text x="${padL-5}" y="${y(nice)+4}" text-anchor="end" font-size="10" fill="var(--muted)">${nice}</text>
+    <text x="${padL-5}" y="${y(nice/2)+4}" text-anchor="end" font-size="10" fill="var(--muted)">${nice/2}</text>
+    <text x="${padL-5}" y="${base+4}" text-anchor="end" font-size="10" fill="var(--muted)">0</text>
+    ${bars}
+    <line x1="${padL}" y1="${gy}" x2="${W-padR}" y2="${gy}" stroke="var(--gold)" stroke-width="1.5"/>
+    <text x="${W-padR}" y="${gy-5}" text-anchor="end" font-size="10" font-weight="800" fill="var(--gold)">goal${S.set.zh?" 目标":""} ${goal}</text>
+    <line x1="${padL}" y1="${base}" x2="${W-padR}" y2="${base}" stroke="var(--line)" stroke-width="1.5"/>
+    ${labels}${hits}
+  </svg>`;
+}
+function T2(en,zh){return S.set.zh?en+'<span class="zh inline">'+zh+'</span>':en;}
+function rProgress(){
+  const st=streak();
+  return `
+  <div class="topbar"><div class="screen-title">${T("My Progress","我的进度")}</div></div>
+  <div class="stack">
+    <div class="card hero-streak">
+      <span style="font-size:3rem">🔥</span>
+      <div>
+        <div class="n">${st.n}</div>
+        <div class="stat-lab">${T("days in a row","连续学习天数")}${st.doneToday?"":" · "+T2("practise today to keep it!","今天练习保持连胜！")}</div>
+      </div>
+    </div>
+    <div class="tiles">
+      <div class="tile-stat"><div class="v">${wordsLearned()}</div><div class="l">${T("words learned","已学单词")}</div></div>
+      <div class="tile-stat"><div class="v">${lessonsDone()}</div><div class="l">${T("lessons done","完成课程")}</div></div>
+      <div class="tile-stat"><div class="v">${totalMin()}</div><div class="l">${T("minutes total","总学习分钟")}</div></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:.5rem">This week · 本周</div>
+      ${chartSVG()}
+    </div>
+    <div class="card lvl-progress">
+      <div class="eyebrow">Course progress · 课程进度</div>
+      ${ALL_LEVELS.map(l=>{const p=levelPct(l); return `
+      <div style="--lc:var(${l.c})">
+        <div class="row" style="gap:.5rem">
+          <span class="nm grow">${l.emoji} ${l.name}<span class="zh">${l.zh}</span></span>
+          <span class="ct">${p.d}/${p.n}</span>
+        </div>
+        <div class="meter"><i style="width:${p.pct}%"></i></div>
+      </div>`;}).join("")}
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+function chips(action,current,opts){
+  return `<div class="chip-group">${opts.map(o=>
+    `<button class="chip ${String(current)===String(o.v)?"on":""}" data-a="${action}:${o.v}">${o.l}</button>`).join("")}</div>`;
+}
+function gcalHref(){
+  const [h,m]=(S.set.remind||"09:00").split(":");
+  const d=day(1); d.setHours(+h,+m,0,0);
+  const e=new Date(d); e.setMinutes(e.getMinutes()+15);
+  const f=x=>x.getFullYear()+String(x.getMonth()+1).padStart(2,"0")+String(x.getDate()).padStart(2,"0")+"T"+String(x.getHours()).padStart(2,"0")+String(x.getMinutes()).padStart(2,"0")+"00";
+  const url=location.href.split("#")[0];
+  const p=new URLSearchParams({action:"TEMPLATE",text:"English practice 学英语 🐨",
+    dates:f(d)+"/"+f(e),recur:"RRULE:FREQ=DAILY",
+    details:"10 minutes of Daily English. Open the app: "+url});
+  return "https://calendar.google.com/calendar/render?"+p.toString();
+}
+function rSettings(){
+  return `
+  <div class="topbar">
+    <button class="backbtn" data-a="tab:home">‹ ${T("Back","返回")}</button>
+    <div class="screen-title">${T("Settings","设置")}</div>
+  </div>
+  <div class="stack">
+    <div class="card stack">
+      <div class="set-group">
+        <div class="set-label">${T("Chinese hints","中文提示")}</div>
+        ${chips("set:zh",S.set.zh,[{v:1,l:"Show <span class='zh'>显示</span>"},{v:0,l:"Hide <span class='zh'>隐藏</span>"}])}
+      </div>
+      <hr class="divider">
+      <div class="set-group">
+        <div class="set-label">${T("Text size","文字大小")}</div>
+        ${chips("set:big",S.set.big,[{v:0,l:"Normal <span class='zh'>标准</span>"},{v:1,l:"Large <span class='zh'>大</span>"}])}
+      </div>
+      <hr class="divider">
+      <div class="set-group">
+        <div class="set-label">${T("Sounds & auto-play","声音与自动朗读")}</div>
+        ${chips("set:sound",S.set.sound,[{v:1,l:"On <span class='zh'>开</span>"},{v:0,l:"Off <span class='zh'>关</span>"}])}
+      </div>
+      <hr class="divider">
+      <div class="set-group">
+        <div class="set-label">${T("Speaking speed","朗读速度")}</div>
+        ${chips("set:rate",S.set.rate,[{v:.9,l:"Normal <span class='zh'>正常</span>"},{v:.75,l:"Slower <span class='zh'>慢速</span>"}])}
+        <div class="set-help">${T("The 🐢 button is always extra slow.","🐢 按钮永远是超慢速。")}</div>
+      </div>
+      <hr class="divider">
+      <div class="set-group">
+        <div class="set-label">${T("Daily goal","每日目标")}</div>
+        ${chips("set:goal",S.set.goal,[5,10,15,20].map(g=>({v:g,l:g+" min"})))}
+      </div>
+      <hr class="divider">
+      <div class="set-group">
+        <div class="set-label">${T("My starting level","我的起点级别")}</div>
+        ${chips("set:level",S.set.level,LEVELS.map(l=>({v:l.id,l:l.emoji+" "+l.name.split("·")[0].trim()})))}
+        <div class="set-help">${T("The Today button suggests lessons from here.","“今天”页面会从这里推荐课程。")}</div>
+      </div>
+    </div>
+
+    <div class="card stack">
+      <div class="set-group">
+        <div class="set-label">⏰ ${T("Daily reminder","每日提醒")}</div>
+        <div class="set-help">${T("Pick a time, then set up a daily reminder on the phone — it will nudge you every day.","选一个时间，然后在手机上设置每日提醒，每天都会提醒你。")}</div>
+        <div class="row">
+          <input type="time" id="remind-time" value="${esc(S.set.remind)}" aria-label="Reminder time">
+        </div>
+        <div class="set-help">🍎 ${T(`On iPhone, ask Siri: “Remind me every day at ${esc(S.set.remind)} to practise English” — or open the Clock app and set a daily alarm called “English time”.`,`在 iPhone 上对 Siri 说：“每天${esc(S.set.remind)}提醒我学英语”，或在“时钟”App 里设一个每天响的闹钟，叫“学英语”。`)}</div>
+        <a class="btn btn-soft" style="text-decoration:none" href="${esc(gcalHref())}" target="_blank" rel="noopener" data-a-link="gcal">📅 ${T("Use Google Calendar instead","或者加到谷歌日历")}</a>
+      </div>
+    </div>
+
+    <div class="card stack">
+      ${UI.confirmReset?`
+      <div class="set-label" style="color:var(--danger)">${T("Delete all progress? This cannot be undone.","删除所有进度？此操作无法撤销。")}</div>
+      <div class="row">
+        <button class="btn btn-danger grow" data-a="reset:yes">${T("Yes, start over","是的，重新开始")}</button>
+        <button class="btn btn-plain grow" data-a="reset:no">${T("Cancel","取消")}</button>
+      </div>`:`
+      <button class="btn btn-plain" data-a="reset:ask" style="color:var(--danger)">${T("Reset all progress","清空所有进度")}</button>`}
+    </div>
+
+    <p style="text-align:center;color:var(--muted);font-weight:700;font-size:.95rem">
+      Made with <span class="heart">♥</span> for Mum<span class="zh">用心为妈妈制作</span>
+    </p>
+  </div>`;
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+let primed=false;
+function prime(){ if(primed||!synth)return; primed=true;
+  try{const u=new SpeechSynthesisUtterance(" "); u.volume=0; synth.speak(u);}catch(e){}
+}
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-a]");
+  if(!el)return;
+  prime();
+  const [a,arg]=el.dataset.a.split(/:(.*)/s);
+  const Q=L&&L.q;
+  switch(a){
+    case "tab": L=null; UI.tab=arg; UI.screen=arg; UI.chartSel=6; render(); break;
+    case "settings": UI.screen="settings"; UI.confirmReset=0; render(); break;
+    case "w": if(arg==="done"){S.first=0; save(); UI.screen="home"; UI.tab="home";} else UI.wstep=+arg; render(); break;
+    case "wlevel": S.set.level=arg; save(); UI.wstep=2; render(); break;
+    case "wgoal": S.set.goal=+arg; save(); render(); break;
+    case "openlevel": UI.screen="units"; UI.level=arg; UI.tab="levels"; render(); break;
+    case "start": startLesson(arg); break;
+    case "review": startReview(); break;
+    case "exit": exitLesson(); break;
+    case "learn":
+      if(arg==="next"){ if(L.i+1<L.words.length){L.i++;} else {L.stage="quiz"; L.q=makeQuiz(L.words,false);} render(); }
+      else if(arg==="prev"&&L.i>0){L.i--; render();}
+      break;
+    case "say": speak(el.dataset.say); break;
+    case "say-slow": speak(el.dataset.say,.55); break;
+    case "ans": {
+      const q=Q.qs[Q.qi]; Q.pickedI=+arg;
+      answer(q.opts[+arg].ok,q); break;}
+    case "tile": {
+      const q=Q.qs[Q.qi]; const b=q.tiles[+arg];
+      if(!Q.built.includes(b)){Q.built.push(b); render();
+        if(Q.built.length===q.tokens.length){
+          const ok=Q.built.map(x=>x.t).join(" ")===q.target;
+          setTimeout(()=>answer(ok,q),250);
+        }}
+      break;}
+    case "untile": if(!Q.answered){Q.built.splice(+arg,1); render();} break;
+    case "cont": continueQuiz(); break;
+    case "bar": UI.chartSel=+arg; render(); break;
+    case "set": {
+      const [k,v]=arg.split(/:(.*)/s);
+      if(k==="zh")S.set.zh=+v;
+      if(k==="big")S.set.big=+v;
+      if(k==="sound")S.set.sound=+v;
+      if(k==="rate")S.set.rate=+v;
+      if(k==="goal")S.set.goal=+v;
+      if(k==="level")S.set.level=v;
+      save(); render(); break;}
+    case "reset":
+      if(arg==="ask"){UI.confirmReset=1; render();}
+      if(arg==="no"){UI.confirmReset=0; render();}
+      if(arg==="yes"){try{localStorage.removeItem(KEY);}catch(e){} S=clone(DEFAULTS); UI.confirmReset=0; UI.wstep=0; UI.screen="welcome"; render();}
+      break;
+  }
+});
+document.addEventListener("change",e=>{
+  if(e.target.id==="remind-time"){
+    S.set.remind=e.target.value||"09:00"; S.set.remindSet=1; save();
+    const a=document.querySelector('[data-a-link="gcal"]');
+    if(a)a.href=gcalHref();
+  }
+});
+document.addEventListener("click",e=>{
+  if(e.target.closest('[data-a-link="gcal"]')){S.set.remindSet=1; save();}
+});
+
+/* ---------- active-time tracking ---------- */
+setInterval(()=>{
+  if(document.visibilityState!=="visible"||S.first||UI.screen==="welcome")return;
+  const r=dayRec(); r.s=(r.s||0)+15;
+  if(!r.g && Math.floor(r.s/60)>=S.set.goal){
+    r.g=1; toast("🎉 Daily goal reached!<span class='zh'>达成今日目标！</span>");
+  }
+  save();
+},15000);
+
+/* ---------- boot ---------- */
+injectIcons();
+if(!S.created){S.created=today(); save();}
+if(S.first){UI.screen="welcome";}
+render();
+</script>
+</body></html>
