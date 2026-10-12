@@ -877,6 +877,7 @@ function pickVoice(){
   return en[0]||null;
 }
 if(synth)synth.addEventListener?.("voiceschanged",()=>{VOICE=pickVoice();});
+let curUtter=null;
 function speak(text,rate){
   if(!synth||!text)return;
   try{
@@ -885,6 +886,9 @@ function speak(text,rate){
     const u=new SpeechSynthesisUtterance(text.replace(/—/g,", "));
     u.lang=VOICE?VOICE.lang:"en-AU"; if(VOICE)u.voice=VOICE;
     u.rate=rate||S.set.rate; u.pitch=1;
+    curUtter=u; // hold a reference so the browser can't garbage-collect it mid-speech (goes silent)
+    u.onend=u.onerror=()=>{if(curUtter===u)curUtter=null;};
+    try{if(synth.paused)synth.resume();}catch(e){} // nudge out of the stuck-paused state some browsers fall into
     synth.speak(u);
   }catch(e){}
 }
@@ -907,9 +911,8 @@ function ding(ok){
 
 /* ---------- speaking practice (speech recognition) ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
-let micDead=false;
 const MIC={state:"idle",res:null,heard:""};
-function micAvailable(){return !!SR&&!micDead&&S.set.mic!==0;}
+function micAvailable(){return !!SR&&S.set.mic!==0;}
 function micReset(){MIC.state="idle";MIC.res=null;MIC.heard="";}
 const HOMO=[["one","won","1"],["two","to","too","2"],["three","3"],["four","for","4","fore"],["five","5"],["six","6"],["seven","7"],["eight","ate","8"],["nine","9"],["ten","10"],["no","know"],["new","knew"],["right","write"],["red","read"],["blue","blew"],["meet","meat"],["son","sun"],["week","weak"],["see","sea"],["hi","high"],["bye","by","buy"],["tea","t"],["hear","here"],["wear","where"],["i","eye"],["our","hour"]];
 function canonTok(w){for(const g of HOMO){if(g.includes(w))return g[0];}return w;}
@@ -943,18 +946,18 @@ function scoreSpeech(alt,target){
   return total/T.length;
 }
 function bestScore(alts,target){let b=0;for(const a of alts){b=Math.max(b,scoreSpeech(a,target));}return b;}
-let recTimer=null;
+let recTimer=null,recHardTimer=null;
 function startListen(target){
   if(!micAvailable()||MIC.state==="listening")return;
   try{if(synth)synth.cancel();}catch(e){}
   let rec;
-  try{rec=new SR();}catch(e){micDead=true;render();return;}
+  try{rec=new SR();}catch(e){MIC.state="idle";MIC.res="retry";render();return;}
   rec.lang=(VOICE&&VOICE.lang)||"en-AU";
   rec.interimResults=false; rec.maxAlternatives=5; rec.continuous=false;
   MIC.state="listening"; MIC.res=null; MIC.heard=""; render();
   let done=false;
   const finish=(res,heard)=>{
-    if(done)return; done=true; clearTimeout(recTimer);
+    if(done)return; done=true; clearTimeout(recTimer); clearTimeout(recHardTimer);
     MIC.state="idle"; MIC.res=res; MIC.heard=heard||"";
     if(res==="good")ding(true);
     render();
@@ -965,16 +968,18 @@ function startListen(target){
       const alts=[]; for(let i=0;i<seg.length;i++)alts.push(seg[i].transcript);
       const sc=bestScore(alts,target);
       finish(sc>=0.85?"good":sc>=0.5?"mid":"try",alts[0]);
-    }catch(err){finish("none","");}
+    }catch(err){finish("retry","");}
   };
   rec.onerror=e=>{
-    if(e&&(e.error==="not-allowed"||e.error==="service-not-allowed"||e.error==="audio-capture")){
-      done=true; clearTimeout(recTimer); micDead=true; micReset(); render();
-    }else finish("none","");
+    // iOS Safari throws transient errors (service-not-allowed / not-allowed /
+    // network) after repeated use. NEVER disable the feature — just let her tap
+    // to try again. "no-speech" means she stayed silent, so prompt to speak up.
+    finish((e&&e.error==="no-speech")?"none":"retry","");
   };
   rec.onend=()=>{if(!done)finish("none","");};
-  try{rec.start();}catch(e){finish("none","");return;}
-  recTimer=setTimeout(()=>{try{rec.stop();}catch(e){}},8000);
+  try{rec.start();}catch(e){finish("retry","");return;}
+  recTimer=setTimeout(()=>{try{rec.stop();}catch(e){}},7000);
+  recHardTimer=setTimeout(()=>finish("none",""),9500); // never get stuck on "Listening…" if no event fires
 }
 function micZone(w){
   const say=esc(w.en);
@@ -989,6 +994,8 @@ function micZone(w){
       return `<div class="mic-zone miconly"><div class="mic-res mid">${T("So close! I heard:","很接近！我听到的是：")} “${esc(MIC.heard)}”</div><div class="say-row">${hear}${again}</div></div>`;
     if(MIC.res==="none")
       return `<div class="mic-zone miconly"><div class="mic-res try">${T("I didn't hear anything — hold the phone closer.","没听到声音——手机拿近一点。")}</div><div class="say-row">${again}</div></div>`;
+    if(MIC.res==="retry")
+      return `<div class="mic-zone miconly"><div class="mic-res try">${T("Hmm, that didn't work — tap to try again.","刚才没成功——点一下再试一次。")}</div><div class="say-row">${again}</div></div>`;
     return `<div class="mic-zone miconly"><div class="mic-res try">${T("Listen once more, then try again.","先再听一遍，然后再试一次。")}${MIC.heard?` ${T("I heard:","我听到的是：")} “${esc(MIC.heard)}”`:""}</div><div class="say-row">${hear}${again}</div></div>`;
   }
   return `<div class="mic-zone miconly"><button class="btn btn-soft" data-a="mic" data-say="${say}">🎤 ${T("Say it — I'll listen","跟读一下，我来听")}</button></div>`;
