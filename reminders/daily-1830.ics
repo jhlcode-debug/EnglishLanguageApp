@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//MumsDailyEnglish//Reminder//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:daily-english-1830@jhlcode-debug.github.io
+DTSTAMP:20261012T000000Z
+DTSTART:20261013T183000
+DTEND:20261013T184500
+RRULE:FREQ=DAILY
+SUMMARY:学英语 English practice 🐨
+DESCRIPTION:打开小考拉 App 学英语：https://jhlcode-debug.github.io/EnglishLanguageApp/
+URL:https://jhlcode-debug.github.io/EnglishLanguageApp/
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:学英语时间到啦 English time!
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+END:VCALENDAR
