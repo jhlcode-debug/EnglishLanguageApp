@@ -111,7 +111,9 @@ body.nosound .sndonly{display:none !important}
 .speak-btn.gold{background:var(--gold-soft); color:var(--gold)}
 .mic-zone{margin-top:1.1rem; display:flex; flex-direction:column; gap:.6rem; align-items:center}
 .mic-zone .say-row{margin:0}
-.mic-res{border-radius:14px; padding:.7rem 1rem; font-weight:800; font-size:1.05rem; max-width:100%}
+.mic-res{border-radius:14px; padding:.7rem 1rem; font-weight:800; font-size:1.05rem; max-width:100%; text-align:center}
+.mic-res.bad{background:var(--danger-soft); color:var(--danger)}
+.mic-res .zh{color:inherit; opacity:.85}
 .mic-res.good{background:var(--accent-soft); color:var(--accent)}
 .mic-res.mid{background:var(--gold-soft); color:var(--gold)}
 .mic-res.try{background:var(--surface2); color:var(--ink2)}
@@ -124,6 +126,11 @@ body.nomic .miconly{display:none !important}
 .sent-saved .sent-text{font-weight:800; font-size:1.08rem; line-height:1.35}
 .sent-saved .sent-word{font-weight:700; margin-top:.1em}
 .sent-del{font-size:1.15rem; opacity:.55; min-height:2.6rem; min-width:2.6rem; flex:none}
+.gram-reason{font-weight:900; font-size:1.08rem; line-height:1.3}
+.gram-sub{font-weight:700; font-size:.95rem; margin-top:.25em; line-height:1.45}
+.gram-fix{margin-top:.6rem; font-weight:800; font-size:1.15rem; line-height:1.4}
+.gram-old{text-decoration:line-through; opacity:.75}
+.gram-corrected{margin-top:.55rem; font-weight:800; font-size:1.08rem; line-height:1.45}
 
 /* ---------- tab bar ---------- */
 #tabbar{
@@ -1265,8 +1272,8 @@ function micZone(w){
   return `<div class="mic-zone miconly"><button class="btn btn-soft" data-a="mic" data-say="${say}">🎤 ${T("Say it — I'll listen","跟读一下，我来听")}</button></div>`;
 }
 
-/* ---------- make a sentence (productive practice, works fully offline) ---------- */
-const SENT={word:null,mode:"speak",res:null,heard:"",draft:"",view:"practice"};
+/* ---------- make a sentence (productive practice + grammar check) ---------- */
+const SENT={word:null,mode:"speak",res:null,heard:"",draft:"",view:"practice",gram:null,reqId:0};
 function learnedWordIds(){return Object.keys(S.words).filter(id=>WORD[id]);}
 function pickSentenceWord(prevId){
   let ids=learnedWordIds();
@@ -1285,14 +1292,53 @@ function wordInSentence(text,word){
   if(Wt.length===1){const w=Wt[0]; return H.some(h=> h===w || simTok(h,w)>=0.8 || (w.length>=4 && (h.indexOf(w)===0||w.indexOf(h)===0) && Math.abs(h.length-w.length)<=3));}
   return false;
 }
-function gradeSentence(text){
-  const W=SENT.word; text=(text||"").trim(); SENT.heard=text;
-  if(!text){SENT.res="empty"; return;}
-  const has=wordInSentence(text,W.en), wc=toksSp(text).length;
-  SENT.res=!has?"missing":(wc>=3?"good":"short");
-  if(SENT.res==="good"){ding(true); if(S.set.sound)setTimeout(()=>speak(text),240);}
+// Plain-language Chinese hint for a grammar problem, chosen by its category.
+function grammarReasonZh(cat,issue){
+  if(issue==="misspelling"&&cat!=="MISC")return "拼写：这个词好像拼错了。";
+  if(cat==="TYPOS")return "拼写：这个词好像拼错了。";
+  if(cat==="CASING")return "大小写：注意大写字母（比如句子开头，或 “I”）。";
+  if(cat==="CONFUSED_WORDS")return "用词：这里可能用错了词。";
+  if(cat==="MISC"||issue==="misspelling")return "语法：注意冠词（a / an / the）或用词。";
+  if(cat==="GRAMMAR"||issue==="grammar")return "语法：动词或词形需要改一下。";
+  return "语法：句子的语法可以再改一改。";
 }
-function checkTyped(){const el=document.getElementById("sent-input"); if(el)SENT.draft=el.value; gradeSentence(SENT.draft); render();}
+const GRAM_SKIP=new Set(["TYPOGRAPHY","WHITESPACE","STYLE","REDUNDANCY","PUNCTUATION"]);
+// Ask LanguageTool (free, no key) to check the sentence. Returns {status, ...}.
+async function checkGrammar(text){
+  try{
+    const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),8000);
+    const body=new URLSearchParams({text,language:"en-AU",enabledOnly:"false"});
+    const r=await fetch("https://api.languagetool.org/v2/check",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded","Accept":"application/json"},body,signal:ctrl.signal});
+    clearTimeout(to);
+    if(!r.ok)return {status:"unknown"};
+    const j=await r.json();
+    const matches=(j.matches||[]).filter(m=>!GRAM_SKIP.has(m.rule&&m.rule.category&&m.rule.category.id));
+    if(!matches.length)return {status:"ok"};
+    const m=matches[0];
+    const cat=m.rule&&m.rule.category&&m.rule.category.id, issue=m.rule&&m.rule.issueType;
+    const off=m.offset|0, len=m.length|0;
+    const original=text.substr(off,len);
+    const suggestion=(m.replacements&&m.replacements[0]&&m.replacements[0].value)||"";
+    const corrected=suggestion?(text.slice(0,off)+suggestion+text.slice(off+len)):"";
+    return {status:"issue",reason_en:(m.shortMessage||m.message||"Grammar"),reason_zh:grammarReasonZh(cat,issue),original,suggestion,corrected};
+  }catch(e){return {status:"unknown"};}
+}
+// Full check: must use the word, be a real sentence, then be grammatically correct.
+async function runCheck(text,spoken){
+  const W=SENT.word; text=(text||"").trim(); SENT.heard=text; SENT.gram=null;
+  if(!text){SENT.res="empty"; render(); return;}
+  if(!wordInSentence(text,W.en)){SENT.res="missing"; render(); return;}
+  if(toksSp(text).length<2){SENT.res="short"; render(); return;}
+  const myReq=++SENT.reqId;
+  SENT.res="checking"; render();
+  const g=await checkGrammar(text);
+  if(myReq!==SENT.reqId||SENT.word!==W)return; // a newer check or word change superseded this
+  SENT.gram=g;
+  if(g.status==="issue"){ SENT.res=spoken?"tip":"issue"; }
+  else { SENT.res=(g.status==="unknown")?"unknown":"ok"; ding(true); if(S.set.sound)setTimeout(()=>speak(text),240); }
+  render();
+}
+function checkTyped(){const el=document.getElementById("sent-input"); if(el)SENT.draft=el.value; runCheck(SENT.draft,false);}
 let sentTimer=null,sentHard=null;
 function startSentenceListen(){
   const W=SENT.word; if(!W||!micAvailable()||SENT.res==="listening")return;
@@ -1302,8 +1348,7 @@ function startSentenceListen(){
   SENT.res="listening"; SENT.heard=""; render();
   let done=false;
   const finish=(res,heard)=>{if(done)return; done=true; clearTimeout(sentTimer); clearTimeout(sentHard);
-    if(res==="result"){gradeSentence(heard);} else {SENT.res=res; SENT.heard=heard||"";}
-    render();};
+    if(res==="result"){runCheck(heard,true);} else {SENT.res=res; SENT.heard=heard||""; render();}};
   rec.onresult=e=>{try{const seg=e.results[e.results.length-1]; const alts=[]; for(let i=0;i<seg.length;i++)alts.push(seg[i].transcript);
     let chosen=alts[0]; for(const a of alts){if(wordInSentence(a,W.en)){chosen=a;break;}} finish("result",chosen);
   }catch(err){finish("retry","");}};
@@ -1319,7 +1364,7 @@ function saveSentence(){
   if(S.sentences.length>300)S.sentences=S.sentences.slice(-300);
   const rec=dayRec(); rec.sent=(rec.sent||0)+1; save();
   toast(T("Saved to My Sentences ❤️","已收藏到我的句子 ❤️"));
-  SENT.res=null; SENT.heard=""; SENT.draft=""; SENT.word=pickSentenceWord(W.id); render();
+  SENT.res=null; SENT.heard=""; SENT.draft=""; SENT.gram=null; SENT.word=pickSentenceWord(W.id); render();
 }
 function rSentence(){
   if(!SENT.word)SENT.word=pickSentenceWord();
@@ -1337,18 +1382,34 @@ function rSentence(){
       <button class="btn btn-primary" data-a="sentence:practice">✍️ ${T("Make a sentence","造句")}</button>
     </div>`;
   }
-  const res=SENT.res;
+  const res=SENT.res, g=SENT.gram;
+  const heardBox=SENT.heard?`<div class="sent-heard">“${esc(SENT.heard)}”</div>`:"";
   let fb="";
-  if(res&&res!=="listening"){
-    if(res==="good")fb=`<div class="mic-res good">🌟 ${T("Great sentence!","好句子！")}</div>`;
-    else if(res==="short")fb=`<div class="mic-res mid">${T("Good — try adding a few more words.","不错——再多加几个词试试。")}</div>`;
-    else if(res==="missing")fb=`<div class="mic-res mid">${T("Try to use","试着用上")} “${esc(W.en)}”.</div>`;
-    else if(res==="empty")fb=`<div class="mic-res try">${T("Write a sentence first.","先写一个句子。")}</div>`;
-    else if(res==="none")fb=`<div class="mic-res try">${T("I didn't hear anything — hold the phone closer.","没听到声音——手机拿近一点。")}</div>`;
-    else if(res==="retry")fb=`<div class="mic-res try">${T("That didn't work — tap to try again.","刚才没成功——点一下再试一次。")}</div>`;
-    if(SENT.heard&&(res==="good"||res==="short"||res==="missing"))fb+=`<div class="sent-heard">“${esc(SENT.heard)}”</div>`;
+  if(res==="checking")fb=`<div class="mic-res try">⏳ ${T("Checking your sentence…","正在检查你的句子……")}</div>`;
+  else if(res==="ok")fb=`<div class="mic-res good">🌟 ${T("Great — your sentence is correct!","太好了——你的句子是对的！")}</div>${heardBox}`;
+  else if(res==="unknown")fb=`<div class="mic-res good">👍 ${T("Nice sentence! (Grammar check needs internet.)","句子不错！（联网才能检查语法。）")}</div>${heardBox}`;
+  else if(res==="short")fb=`<div class="mic-res mid">${T("Add a few more words to make a full sentence.","再加几个词，组成完整的句子。")}</div>`;
+  else if(res==="missing")fb=`<div class="mic-res mid">${T("Use the word","要用上这个词")} “${esc(W.en)}” ${T("in your sentence.","来造句。")}</div>`;
+  else if(res==="empty")fb=`<div class="mic-res try">${T("Write a sentence first.","先写一个句子。")}</div>`;
+  else if(res==="none")fb=`<div class="mic-res try">${T("I didn't hear anything — hold the phone closer.","没听到声音——手机拿近一点。")}</div>`;
+  else if(res==="retry")fb=`<div class="mic-res try">${T("That didn't work — tap to try again.","刚才没成功——点一下再试一次。")}</div>`;
+  else if((res==="issue"||res==="tip")&&g){
+    const title=res==="tip"?`🎤 ${T("I heard","我听到的是")}: “${esc(SENT.heard)}”`:`✏️ ${T("Let's fix one thing","我们来改一处")}`;
+    const change=g.suggestion
+      ?`<div class="gram-fix">${T("Change","改一下")} <span class="gram-old">${esc(g.original)}</span> → <b>${esc(g.suggestion)}</b></div>`
+      :(g.original?`<div class="gram-fix">${T("Look at this part","看看这部分")}: <span class="gram-old">${esc(g.original)}</span></div>`:"");
+    const corr=g.corrected
+      ?`<div class="gram-corrected">✅ ${esc(g.corrected)} <button class="speak-btn sndonly small" data-a="say" data-say="${esc(g.corrected)}">🔊</button></div>
+         <button class="btn btn-soft" data-a="sent-fix" style="margin-top:.55rem">✓ ${T("Use the correct sentence","用这个正确的句子")}</button>`
+      :`<div class="gram-sub">${T("Try changing that part, then check again.","改一改那部分，然后再检查一次。")}</div>`;
+    fb=`<div class="mic-res ${res==="tip"?"mid":"bad"}" style="text-align:left">
+      <div class="gram-reason">${title}</div>
+      <div class="gram-sub">${esc(g.reason_en)}<span class="zh">${g.reason_zh}</span></div>
+      ${change}${corr}
+    </div>`;
   }
-  const canSave=(res==="good"||res==="short")&&SENT.heard;
+  const canSave=(res==="ok"||res==="unknown"||res==="tip")&&SENT.heard;
+  const checking=res==="checking";
   const typeMode=SENT.mode==="type"||!micAvailable();
   return `
   <div class="topbar"><button class="backbtn" data-a="tab:home">‹ ${T("Back","返回")}</button><div class="screen-title">✍️ ${T("Make a Sentence","造句")}</div></div>
@@ -1370,14 +1431,18 @@ function rSentence(){
         <button class="chip ${typeMode?"on":""}" data-a="sent-mode:type">⌨️ ${T("Type it","打出来")}</button>
       </div>`:""}
       ${typeMode?`
-        <input type="text" id="sent-input" class="sent-input" placeholder="${T("Write your sentence…","写下你的句子……")}" value="${esc(SENT.draft||"")}" autocomplete="off" autocapitalize="sentences">
-        <button class="btn btn-primary" data-a="sent-check" style="margin-top:.6rem">✓ ${T("Check my sentence","检查我的句子")}</button>
+        <input type="text" id="sent-input" class="sent-input" placeholder="${esc(S.set.zh?"写下你的句子…":"Write your sentence…")}" value="${esc(SENT.draft||"")}" autocomplete="off" autocapitalize="sentences" ${checking?"disabled":""}>
+        ${checking
+          ?`<button class="btn btn-primary" disabled style="margin-top:.6rem;opacity:.6">⏳ ${T("Checking…","检查中……")}</button>`
+          :`<button class="btn btn-primary" data-a="sent-check" style="margin-top:.6rem">✓ ${T("Check my sentence","检查我的句子")}</button>`}
       `:`
         ${res==="listening"
-          ?`<div class="mic-res listening" style="text-align:center">🎤 ${T("Listening… say your sentence!","正在听……请说出你的句子！")}</div>`
+          ?`<div class="mic-res listening">🎤 ${T("Listening… say your sentence!","正在听……请说出你的句子！")}</div>`
+          :checking
+          ?`<button class="btn btn-primary" disabled style="opacity:.6">⏳ ${T("Checking…","检查中……")}</button>`
           :`<button class="btn btn-primary" data-a="sent-speak">🎤 ${T("Say my sentence","说出我的句子")}</button>`}
       `}
-      ${fb?`<div style="margin-top:.8rem;text-align:center">${fb}</div>`:""}
+      ${fb?`<div style="margin-top:.8rem">${fb}</div>`:""}
       ${canSave?`<button class="btn btn-gold" data-a="sent-save" style="margin-top:.8rem">❤️ ${T("Save it","收藏")}</button>`:""}
     </div>
     <div class="row">
@@ -2092,13 +2157,14 @@ document.addEventListener("click",e=>{
       break;
     case "sentence":
       if(arg==="list"){SENT.view="list";}
-      else {SENT.view="practice"; if(arg!=="practice"){SENT.res=null; SENT.heard=""; SENT.draft=""; if(!SENT.word)SENT.word=pickSentenceWord();}}
+      else {SENT.view="practice"; if(arg!=="practice"){SENT.res=null; SENT.heard=""; SENT.draft=""; SENT.gram=null; if(!SENT.word)SENT.word=pickSentenceWord();}}
       L=null; UI.screen="sentence"; render(); break;
     case "sent-mode": SENT.mode=arg; SENT.res=null; render(); break;
     case "sent-check": checkTyped(); break;
     case "sent-speak": startSentenceListen(); break;
     case "sent-save": saveSentence(); break;
-    case "sent-next": SENT.word=pickSentenceWord(SENT.word&&SENT.word.id); SENT.res=null; SENT.heard=""; SENT.draft=""; render(); break;
+    case "sent-fix": if(SENT.gram&&SENT.gram.corrected){SENT.mode="type"; SENT.draft=SENT.gram.corrected; runCheck(SENT.gram.corrected,false);} break;
+    case "sent-next": SENT.word=pickSentenceWord(SENT.word&&SENT.word.id); SENT.res=null; SENT.heard=""; SENT.draft=""; SENT.gram=null; render(); break;
     case "sent-del": {const i=+arg; if(S.sentences&&i>=0&&i<S.sentences.length){S.sentences.splice(i,1); save();} render(); break;}
   }
 });
