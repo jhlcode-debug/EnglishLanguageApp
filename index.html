@@ -118,6 +118,12 @@ body.nosound .sndonly{display:none !important}
 .mic-res.listening{background:var(--danger-soft); color:var(--danger); animation:pulse 1.2s ease infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 body.nomic .miconly{display:none !important}
+.sent-input{width:100%; font:inherit; font-size:1.15rem; padding:.75rem .85rem; border:2px solid var(--line); border-radius:14px; background:var(--surface2); color:var(--ink); min-height:3.3rem}
+.sent-heard{margin-top:.55rem; font-weight:800; font-size:1.2rem; color:var(--ink); line-height:1.35}
+.sent-saved{display:flex; align-items:center; gap:.55rem; padding:.85rem 1rem}
+.sent-saved .sent-text{font-weight:800; font-size:1.08rem; line-height:1.35}
+.sent-saved .sent-word{font-weight:700; margin-top:.1em}
+.sent-del{font-size:1.15rem; opacity:.55; min-height:2.6rem; min-width:2.6rem; flex:none}
 
 /* ---------- tab bar ---------- */
 #tabbar{
@@ -1071,7 +1077,7 @@ const PHRASE_LIST=PHRASES.units.flatMap(u=>u.words.map((w,i)=>u.id+":"+i));
    ============================================================ */
 const KEY="mumsDailyEnglish.v1";
 const DEFAULTS={set:{zh:1,sound:1,big:0,goal:10,rate:.9,level:"l1",remind:"09:00",mic:1},
-  first:1, words:{}, units:{}, days:{}, created:""};
+  first:1, words:{}, units:{}, days:{}, sentences:[], created:""};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let S=load();
 function load(){
@@ -1097,7 +1103,7 @@ const MO_EN=["January","February","March","April","May","June","July","August","
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");}
 
 /* ---------- streak / stats ---------- */
-function isActive(r){return !!r && ((r.l||0)+(r.r||0)>0 || (r.s||0)>=180);}
+function isActive(r){return !!r && ((r.l||0)+(r.r||0)+(r.sent||0)>0 || (r.s||0)>=180);}
 function streak(){
   const doneToday=isActive(S.days[today()]);
   let n=0,d=new Date(); d.setDate(d.getDate()-1);
@@ -1259,6 +1265,128 @@ function micZone(w){
   return `<div class="mic-zone miconly"><button class="btn btn-soft" data-a="mic" data-say="${say}">🎤 ${T("Say it — I'll listen","跟读一下，我来听")}</button></div>`;
 }
 
+/* ---------- make a sentence (productive practice, works fully offline) ---------- */
+const SENT={word:null,mode:"speak",res:null,heard:"",draft:"",view:"practice"};
+function learnedWordIds(){return Object.keys(S.words).filter(id=>WORD[id]);}
+function pickSentenceWord(prevId){
+  let ids=learnedWordIds();
+  if(!ids.length){const lv=LEVELS.find(l=>l.id===S.set.level)||LEVELS[0]; ids=lv.units[0].words.map((w,i)=>lv.units[0].id+":"+i);}
+  // use single vocabulary words (skip phrase packs — those are already whole sentences)
+  let words=ids.map(id=>WORD[id]).filter(w=>w&&w.unit.level.id!=="px");
+  if(!words.length)words=ids.map(id=>WORD[id]).filter(Boolean);
+  const choices=words.filter(w=>!prevId||w.id!==prevId);
+  const arr=choices.length?choices:words;
+  return arr[Math.floor(Math.random()*arr.length)]||null;
+}
+function wordInSentence(text,word){
+  const H=toksSp(text),Wt=toksSp(word);
+  if(!H.length||!Wt.length)return false;
+  for(let i=0;i+Wt.length<=H.length;i++){let ok=true; for(let j=0;j<Wt.length;j++){if(H[i+j]!==Wt[j]){ok=false;break;}} if(ok)return true;}
+  if(Wt.length===1){const w=Wt[0]; return H.some(h=> h===w || simTok(h,w)>=0.8 || (w.length>=4 && (h.indexOf(w)===0||w.indexOf(h)===0) && Math.abs(h.length-w.length)<=3));}
+  return false;
+}
+function gradeSentence(text){
+  const W=SENT.word; text=(text||"").trim(); SENT.heard=text;
+  if(!text){SENT.res="empty"; return;}
+  const has=wordInSentence(text,W.en), wc=toksSp(text).length;
+  SENT.res=!has?"missing":(wc>=3?"good":"short");
+  if(SENT.res==="good"){ding(true); if(S.set.sound)setTimeout(()=>speak(text),240);}
+}
+function checkTyped(){const el=document.getElementById("sent-input"); if(el)SENT.draft=el.value; gradeSentence(SENT.draft); render();}
+let sentTimer=null,sentHard=null;
+function startSentenceListen(){
+  const W=SENT.word; if(!W||!micAvailable()||SENT.res==="listening")return;
+  try{if(synth)synth.cancel();}catch(e){}
+  let rec; try{rec=new SR();}catch(e){SENT.res="retry";render();return;}
+  rec.lang=(VOICE&&VOICE.lang)||"en-AU"; rec.interimResults=false; rec.maxAlternatives=5; rec.continuous=false;
+  SENT.res="listening"; SENT.heard=""; render();
+  let done=false;
+  const finish=(res,heard)=>{if(done)return; done=true; clearTimeout(sentTimer); clearTimeout(sentHard);
+    if(res==="result"){gradeSentence(heard);} else {SENT.res=res; SENT.heard=heard||"";}
+    render();};
+  rec.onresult=e=>{try{const seg=e.results[e.results.length-1]; const alts=[]; for(let i=0;i<seg.length;i++)alts.push(seg[i].transcript);
+    let chosen=alts[0]; for(const a of alts){if(wordInSentence(a,W.en)){chosen=a;break;}} finish("result",chosen);
+  }catch(err){finish("retry","");}};
+  rec.onerror=e=>{finish((e&&e.error==="no-speech")?"none":"retry","");};
+  rec.onend=()=>{if(!done)finish("none","");};
+  try{rec.start();}catch(e){finish("retry","");return;}
+  sentTimer=setTimeout(()=>{try{rec.stop();}catch(e){}},9000);
+  sentHard=setTimeout(()=>finish("none",""),11500);
+}
+function saveSentence(){
+  const W=SENT.word, text=(SENT.heard||"").trim(); if(!text||!W)return;
+  S.sentences=S.sentences||[]; S.sentences.push({w:W.en,text,t:today()});
+  if(S.sentences.length>300)S.sentences=S.sentences.slice(-300);
+  const rec=dayRec(); rec.sent=(rec.sent||0)+1; save();
+  toast(T("Saved to My Sentences ❤️","已收藏到我的句子 ❤️"));
+  SENT.res=null; SENT.heard=""; SENT.draft=""; SENT.word=pickSentenceWord(W.id); render();
+}
+function rSentence(){
+  if(!SENT.word)SENT.word=pickSentenceWord();
+  const W=SENT.word, saved=S.sentences||[];
+  if(!W)return rHome();
+  if(SENT.view==="list"){
+    return `<div class="topbar"><button class="backbtn" data-a="sentence:practice">‹ ${T("Back","返回")}</button><div class="screen-title">📒 ${T("My Sentences","我的句子")}</div></div>
+    <div class="stack">
+      ${saved.length?saved.map((s,i)=>({s,i})).reverse().map(({s,i})=>`
+      <div class="card sent-saved">
+        <div class="grow"><div class="sent-text">${esc(s.text)}</div><div class="sent-word zh">${T("with","用了")} “${esc(s.w)}”</div></div>
+        <button class="speak-btn small sndonly" data-a="say" data-say="${esc(s.text)}">🔊</button>
+        <button class="sent-del" data-a="sent-del:${i}" aria-label="Delete 删除">🗑️</button>
+      </div>`).join(""):`<div class="card" style="text-align:center"><div style="font-size:2.2rem">✍️</div><div class="done-sub">${T("No sentences yet — make your first one!","还没有句子——来造第一句吧！")}</div></div>`}
+      <button class="btn btn-primary" data-a="sentence:practice">✍️ ${T("Make a sentence","造句")}</button>
+    </div>`;
+  }
+  const res=SENT.res;
+  let fb="";
+  if(res&&res!=="listening"){
+    if(res==="good")fb=`<div class="mic-res good">🌟 ${T("Great sentence!","好句子！")}</div>`;
+    else if(res==="short")fb=`<div class="mic-res mid">${T("Good — try adding a few more words.","不错——再多加几个词试试。")}</div>`;
+    else if(res==="missing")fb=`<div class="mic-res mid">${T("Try to use","试着用上")} “${esc(W.en)}”.</div>`;
+    else if(res==="empty")fb=`<div class="mic-res try">${T("Write a sentence first.","先写一个句子。")}</div>`;
+    else if(res==="none")fb=`<div class="mic-res try">${T("I didn't hear anything — hold the phone closer.","没听到声音——手机拿近一点。")}</div>`;
+    else if(res==="retry")fb=`<div class="mic-res try">${T("That didn't work — tap to try again.","刚才没成功——点一下再试一次。")}</div>`;
+    if(SENT.heard&&(res==="good"||res==="short"||res==="missing"))fb+=`<div class="sent-heard">“${esc(SENT.heard)}”</div>`;
+  }
+  const canSave=(res==="good"||res==="short")&&SENT.heard;
+  const typeMode=SENT.mode==="type"||!micAvailable();
+  return `
+  <div class="topbar"><button class="backbtn" data-a="tab:home">‹ ${T("Back","返回")}</button><div class="screen-title">✍️ ${T("Make a Sentence","造句")}</div></div>
+  <div class="stack">
+    <div class="card" style="text-align:center">
+      <div class="eyebrow">${T("Use this word","用这个词")}</div>
+      <div class="word-big" style="font-size:1.9rem">${W.en}</div>
+      <div class="word-zh zh">${W.zh}</div>
+      <div class="say-row" style="margin:.6rem 0 0"><button class="speak-btn sndonly" data-a="say" data-say="${esc(W.en)}">🔊 ${T("Hear it","听一听")}</button></div>
+      <div class="example" style="margin-top:.8rem">
+        <button class="speak-btn sndonly small" data-a="say" data-say="${esc(W.eg)}" aria-label="Hear example">🔊</button>
+        <div class="grow"><div class="set-help">${T("Example to help you","给你参考的例句")}</div><div class="eg-en">${W.eg}</div><div class="eg-zh zh">${W.egZh}</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="q-prompt" style="text-align:center;margin-bottom:.7rem">${T("Now make your own sentence with","现在用它造一个你自己的句子")} “${esc(W.en)}”.</div>
+      ${micAvailable()?`<div class="chip-group" style="justify-content:center;margin-bottom:.7rem">
+        <button class="chip ${!typeMode?"on":""}" data-a="sent-mode:speak">🎤 ${T("Say it","说出来")}</button>
+        <button class="chip ${typeMode?"on":""}" data-a="sent-mode:type">⌨️ ${T("Type it","打出来")}</button>
+      </div>`:""}
+      ${typeMode?`
+        <input type="text" id="sent-input" class="sent-input" placeholder="${T("Write your sentence…","写下你的句子……")}" value="${esc(SENT.draft||"")}" autocomplete="off" autocapitalize="sentences">
+        <button class="btn btn-primary" data-a="sent-check" style="margin-top:.6rem">✓ ${T("Check my sentence","检查我的句子")}</button>
+      `:`
+        ${res==="listening"
+          ?`<div class="mic-res listening" style="text-align:center">🎤 ${T("Listening… say your sentence!","正在听……请说出你的句子！")}</div>`
+          :`<button class="btn btn-primary" data-a="sent-speak">🎤 ${T("Say my sentence","说出我的句子")}</button>`}
+      `}
+      ${fb?`<div style="margin-top:.8rem;text-align:center">${fb}</div>`:""}
+      ${canSave?`<button class="btn btn-gold" data-a="sent-save" style="margin-top:.8rem">❤️ ${T("Save it","收藏")}</button>`:""}
+    </div>
+    <div class="row">
+      <button class="btn btn-soft grow" data-a="sent-next">🔄 ${T("Another word","换个词")}</button>
+      <button class="btn btn-plain grow" data-a="sentence:list">📒 ${T("My Sentences","我的句子")}${saved.length?` (${saved.length})`:""}</button>
+    </div>
+  </div>`;
+}
+
 /* ---------- toast ---------- */
 let toastT=null;
 function toast(html){
@@ -1285,7 +1413,7 @@ function render(){
     const b=document.getElementById("tab-"+t);
     if(b)b.classList.toggle("on",UI.tab===t&&UI.screen!=="welcome");
   });
-  const r={welcome:rWelcome,home:rHome,levels:rLevels,units:rUnits,lesson:rLesson,review:rLesson,progress:rProgress,settings:rSettings}[UI.screen]||rHome;
+  const r={welcome:rWelcome,home:rHome,levels:rLevels,units:rUnits,lesson:rLesson,review:rLesson,progress:rProgress,settings:rSettings,sentence:rSentence}[UI.screen]||rHome;
   app.innerHTML=r();
   window.scrollTo(0,0);
   afterRender();
@@ -1393,6 +1521,7 @@ function rHome(){
     </div>`}
     ${due>0?`
     <button class="btn btn-gold" data-a="review">🔁 ${T(`Review ${due} word${due>1?"s":""}`,`复习 ${due} 个单词`)}</button>`:""}
+    <button class="btn btn-soft" data-a="sentence">✍️ ${T("Make your own sentence","自己造句")}</button>
     <div class="card pod-card">
       <div class="eyebrow">Phrase of the day · 每日一句</div>
       <div class="phrase-en">${pod.en}</div>
@@ -1776,6 +1905,12 @@ function rProgress(){
       <div class="eyebrow" style="margin-bottom:.5rem">This week · 本周</div>
       ${chartSVG()}
     </div>
+    <button class="card sent-saved" style="width:100%;text-align:left" data-a="sentence">
+      <span style="font-size:1.9rem">✍️</span>
+      <span class="grow"><span class="nm">${T("My Sentences","我的句子")}</span>
+        <span class="set-help" style="display:block">${(S.sentences||[]).length?T(`You've made ${S.sentences.length} sentence${S.sentences.length>1?"s":""}`,`你已经造了 ${S.sentences.length} 个句子`):T("Make your first sentence!","来造第一个句子吧！")}</span></span>
+      <span style="font-weight:900;color:var(--accent);font-size:1.2rem">➜</span>
+    </button>
     <div class="card lvl-progress">
       <div class="eyebrow">Course progress · 课程进度</div>
       ${ALL_LEVELS.map(l=>{const p=levelPct(l); return `
@@ -1955,8 +2090,19 @@ document.addEventListener("click",e=>{
       if(arg==="no"){UI.confirmReset=0; render();}
       if(arg==="yes"){try{localStorage.removeItem(KEY);}catch(e){} S=clone(DEFAULTS); UI.confirmReset=0; UI.wstep=0; UI.screen="welcome"; render();}
       break;
+    case "sentence":
+      if(arg==="list"){SENT.view="list";}
+      else {SENT.view="practice"; if(arg!=="practice"){SENT.res=null; SENT.heard=""; SENT.draft=""; if(!SENT.word)SENT.word=pickSentenceWord();}}
+      L=null; UI.screen="sentence"; render(); break;
+    case "sent-mode": SENT.mode=arg; SENT.res=null; render(); break;
+    case "sent-check": checkTyped(); break;
+    case "sent-speak": startSentenceListen(); break;
+    case "sent-save": saveSentence(); break;
+    case "sent-next": SENT.word=pickSentenceWord(SENT.word&&SENT.word.id); SENT.res=null; SENT.heard=""; SENT.draft=""; render(); break;
+    case "sent-del": {const i=+arg; if(S.sentences&&i>=0&&i<S.sentences.length){S.sentences.splice(i,1); save();} render(); break;}
   }
 });
+document.addEventListener("input",e=>{ if(e.target.id==="sent-input")SENT.draft=e.target.value; });
 document.addEventListener("change",e=>{
   if(e.target.id==="remind-time"){
     S.set.remind=e.target.value||"09:00"; S.set.remindSet=1; save();
