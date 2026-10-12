@@ -1222,7 +1222,7 @@ function startReview(){
 }
 function makeQuiz(words,isReview){
   const pick=shuffle(words).slice(0,Math.min(isReview?15:8,words.length));
-  const types=isReview?["enzh","zhen","listen"]:["enzh","listen","zhen","build","enzh","listen","build","zhen"];
+  const types=isReview?["build","enzh","zhen","build","listen"]:["build","enzh","build","listen","build","zhen","build","enzh"];
   const qs=pick.map((w,i)=>{
     let t=types[i%types.length];
     const target=w.unit.level.id==="px"?w.en:w.eg;
@@ -1319,12 +1319,24 @@ function rQuiz(){
     <div class="tilebox answer" aria-label="Your sentence">${Q.built.map((b,i)=>`<button class="tile" data-a="untile:${i}">${b.t}</button>`).join("")||`<span class="set-help">${T("Tap the words below in order","按顺序点下面的单词")}</span>`}</div>
     <div class="tilebox">${q.tiles.map((b,i)=>Q.built.includes(b)?"":`<button class="tile" data-a="tile:${i}">${b.t}</button>`).join("")}</div>`;
   }
+  let fbMid="";
+  if(Q.fb&&!Q.fb.ok){
+    if(Q.fb.retryBuild){
+      fbMid=Q.fb.showAns
+        ?`<div class="fb-ans">${T("The right order is","正确的顺序是")}: ${Q.fb.ans}
+            <button class="speak-btn sndonly small" data-a="say" data-say="${esc(Q.fb.say)}">🔊</button></div>`
+        :`<div class="fb-ans">${T("Have another go — you can do it! 😊","再试一次，你可以的！😊")}
+            <button class="speak-btn sndonly small" data-a="say" data-say="${esc(Q.fb.say)}">🔊 ${T("Hear it","听一听")}</button></div>`;
+    }else{
+      fbMid=`<div class="fb-ans">${T("Answer","正确答案")}: ${Q.fb.ans}
+            <button class="speak-btn sndonly small" data-a="say" data-say="${esc(Q.fb.say)}">🔊</button></div>`;
+    }
+  }
   const fb=Q.fb?`
   <div class="feedback ${Q.fb.ok?"good":"bad"}"><div class="inner">
-    <div class="fb-title">${Q.fb.ok?T("Correct! 🎉","答对了！"):T("Not quite","再接再厉")}</div>
-    ${Q.fb.ok?"":`<div class="fb-ans">${T("Answer","正确答案")}: ${Q.fb.ans}
-      <button class="speak-btn sndonly small" data-a="say" data-say="${esc(Q.fb.say)}">🔊</button></div>`}
-    <button class="fb-btn" data-a="cont">${T("Continue","继续")}</button>
+    <div class="fb-title">${Q.fb.ok?T("Correct! 🎉","答对了！"):(Q.fb.retryBuild?T("Not quite — try again","差一点，再试一次"):T("Not quite","再接再厉"))}</div>
+    ${fbMid}
+    <button class="fb-btn" data-a="${Q.fb.retryBuild?"redo":"cont"}">${Q.fb.retryBuild?T("Try again","再试一次"):T("Continue","继续")}</button>
   </div></div>`:"";
   return lessonTop(L.review?pct:(L.words.length? (L.words.length+Q.qi)/(L.words.length+Q.qs.length):pct))+`
   <div class="counter" style="text-align:center;margin-bottom:.4rem">${T(`Question ${Q.qi+1} of ${total}`,`第 ${Q.qi+1} 题，共 ${total} 题`)}</div>
@@ -1335,13 +1347,29 @@ function rQuiz(){
 function answer(ok,q){
   const Q=L&&L.q; if(!Q||Q.answered)return;
   if(Q.qs[Q.qi]!==q)return;
-  Q.answered=true;
-  if(ok){Q.right++;}else{Q.wrong++; if(!L.review&&!q.isRetry&&Q.retried<6){const copy={...q,opts:null,tiles:null,isRetry:true}; Q.retry.push(copy); Q.retried++;}}
+  const isBuild=q.t==="build";
+  // Score each question only once, on the first attempt, so stats and review
+  // scheduling reflect how she really did — retries don't change the score.
+  if(!q.scored){
+    q.scored=true;
+    if(ok){Q.right++;}
+    else{Q.wrong++;
+      if(!isBuild&&!L.review&&!q.isRetry&&Q.retried<6){const copy={...q,opts:null,tiles:null,scored:false,isRetry:true}; Q.retry.push(copy); Q.retried++;}}
+    applySRS(q.w.id,ok);
+  }
   ding(ok);
-  if(!ok&&S.set.sound)setTimeout(()=>speak(q.t==="build"?q.target:q.w.en,.85),350);
-  applySRS(q.w.id,ok);
-  const ansTxt=q.t==="enzh"?q.w.zh:(q.t==="build"?q.target:q.w.en);
-  Q.fb={ok,ans:ansTxt,say:q.t==="enzh"?q.w.en:(q.t==="build"?q.target:q.w.en)};
+  if(!ok&&S.set.sound)setTimeout(()=>speak(isBuild?q.target:q.w.en,.85),350);
+  // Sentence reorder done wrong: don't move on — reset and let her rebuild it
+  // until it's correct. Show the right order as a hint from the second try.
+  if(isBuild&&!ok){
+    q.wrongCount=(q.wrongCount||0)+1;
+    Q.answered=true;
+    Q.fb={ok:false,retryBuild:true,showAns:q.wrongCount>=2,ans:q.target,say:q.target};
+    render(); return;
+  }
+  Q.answered=true;
+  const ansTxt=q.t==="enzh"?q.w.zh:(isBuild?q.target:q.w.en);
+  Q.fb={ok,ans:ansTxt,say:q.t==="enzh"?q.w.en:(isBuild?q.target:q.w.en)};
   render();
 }
 function continueQuiz(){
@@ -1645,6 +1673,7 @@ document.addEventListener("click",e=>{
       break;}
     case "untile": if(!Q.answered){Q.built.splice(+arg,1); render();} break;
     case "cont": continueQuiz(); break;
+    case "redo": Q.answered=false; Q.fb=null; Q.built=[]; render(); break;
     case "bar": UI.chartSel=+arg; render(); break;
     case "set": {
       const [k,v]=arg.split(/:(.*)/s);
