@@ -131,6 +131,15 @@ body.nomic .miconly{display:none !important}
 .gram-fix{margin-top:.6rem; font-weight:800; font-size:1.15rem; line-height:1.4}
 .gram-old{text-decoration:line-through; opacity:.75}
 .gram-corrected{margin-top:.55rem; font-weight:800; font-size:1.08rem; line-height:1.45}
+.gram-box{text-align:left; background:var(--surface2); border-radius:14px; padding:.9rem 1rem}
+.gram-line{margin-top:.5rem}
+.gram-tag{display:block; font-size:.82rem; font-weight:800; letter-spacing:.02em}
+.gram-tag.wrong{color:var(--danger)}
+.gram-tag.right{color:var(--accent)}
+.gram-say{font-weight:800; font-size:1.15rem; line-height:1.4}
+.gram-say.wrong-text{color:var(--danger)}
+.gram-say.right-text{color:var(--accent)}
+.gram-new{font-weight:900; text-decoration:underline}
 
 /* ---------- tab bar ---------- */
 #tabbar{
@@ -1369,6 +1378,14 @@ function saveSentence(){
   else { SENT.word=pickSentenceWord(W.id); }
   render();
 }
+// Wrap the first occurrence of `part` in `text` with a span of class `cls` (rest escaped).
+function hl(text,part,cls){
+  text=String(text||"");
+  if(!part)return esc(text);
+  const i=text.indexOf(part);
+  if(i<0)return esc(text);
+  return esc(text.slice(0,i))+`<span class="${cls}">${esc(part)}</span>`+esc(text.slice(i+part.length));
+}
 // The reusable sentence-maker guts (mode toggle, input/speak, grammar feedback, save),
 // bound to the current SENT state. Used both inline on each learn card and on the standalone screen.
 function sentMakerBody(W){
@@ -1384,18 +1401,16 @@ function sentMakerBody(W){
   else if(res==="none")fb=`<div class="mic-res try">${T("I didn't hear anything — hold the phone closer.","没听到声音——手机拿近一点。")}</div>`;
   else if(res==="retry")fb=`<div class="mic-res try">${T("That didn't work — tap to try again.","刚才没成功——点一下再试一次。")}</div>`;
   else if((res==="issue"||res==="tip")&&g){
-    const title=res==="tip"?`🎤 ${T("I heard","我听到的是")}: “${esc(SENT.heard)}”`:`✏️ ${T("Let's fix one thing","我们来改一处")}`;
-    const change=g.suggestion
-      ?`<div class="gram-fix">${T("Change","改一下")} <span class="gram-old">${esc(g.original)}</span> → <b>${esc(g.suggestion)}</b></div>`
-      :(g.original?`<div class="gram-fix">${T("Look at this part","看看这部分")}: <span class="gram-old">${esc(g.original)}</span></div>`:"");
-    const corr=g.corrected
-      ?`<div class="gram-corrected">✅ ${esc(g.corrected)} <button class="speak-btn sndonly small" data-a="say" data-say="${esc(g.corrected)}">🔊</button></div>
-         <button class="btn btn-soft" data-a="sent-fix" style="margin-top:.55rem">✓ ${T("Use the correct sentence","用这个正确的句子")}</button>`
-      :`<div class="gram-sub">${T("Try changing that part, then check again.","改一改那部分，然后再检查一次。")}</div>`;
-    fb=`<div class="mic-res ${res==="tip"?"mid":"bad"}" style="text-align:left">
-      <div class="gram-reason">${title}</div>
+    const spoken=res==="tip";
+    const yours=hl(SENT.heard,g.original,"gram-old");           // her sentence, wrong part struck through
+    const right=g.corrected?hl(g.corrected,g.suggestion,"gram-new"):""; // correct sentence, fix underlined
+    fb=`<div class="gram-box">
+      <div class="gram-reason">✏️ ${T("Let's make it correct","我们来改正")}</div>
       <div class="gram-sub">${esc(g.reason_en)}<span class="zh">${g.reason_zh}</span></div>
-      ${change}${corr}
+      <div class="gram-line"><span class="gram-tag wrong">✗ ${spoken?T("You said","你说的"):T("Your sentence","你写的")}</span><span class="gram-say wrong-text">${yours}</span></div>
+      ${g.corrected?`<div class="gram-line"><span class="gram-tag right">✓ ${T("Correct answer","正确答案")}</span><span class="gram-say right-text">${right} <button class="speak-btn sndonly small" data-a="say" data-say="${esc(g.corrected)}">🔊</button></span></div>`:""}
+      ${g.suggestion?`<div class="gram-fix" style="margin-top:.6rem">${T("Change","把")} <span class="gram-old">${esc(g.original)}</span> → <b class="gram-new">${esc(g.suggestion)}</b></div>`:""}
+      ${g.corrected?`<button class="btn btn-soft" data-a="sent-fix" style="margin-top:.7rem">✓ ${T("Use the correct answer","用正确答案")}</button>`:`<div class="gram-sub" style="margin-top:.5rem">${T("Try changing that part, then check again.","改一改那部分，然后再检查一次。")}</div>`}
     </div>`;
   }
   const canSave=(res==="ok"||res==="unknown"||res==="tip")&&SENT.heard;
