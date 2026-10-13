@@ -1364,24 +1364,14 @@ function saveSentence(){
   if(S.sentences.length>300)S.sentences=S.sentences.slice(-300);
   const rec=dayRec(); rec.sent=(rec.sent||0)+1; save();
   toast(T("Saved to My Sentences ❤️","已收藏到我的句子 ❤️"));
-  SENT.res=null; SENT.heard=""; SENT.draft=""; SENT.gram=null; SENT.word=pickSentenceWord(W.id); render();
+  SENT.res=null; SENT.heard=""; SENT.draft=""; SENT.gram=null;
+  if(SENT.ctx==="lesson"){ if(L&&L.words&&L.words[L.i])SENT.word=L.words[L.i]; } // in a lesson: keep the same word
+  else { SENT.word=pickSentenceWord(W.id); }
+  render();
 }
-function rSentence(){
-  if(!SENT.word)SENT.word=pickSentenceWord();
-  const W=SENT.word, saved=S.sentences||[];
-  if(!W)return rHome();
-  if(SENT.view==="list"){
-    return `<div class="topbar"><button class="backbtn" data-a="sentence:practice">‹ ${T("Back","返回")}</button><div class="screen-title">📒 ${T("My Sentences","我的句子")}</div></div>
-    <div class="stack">
-      ${saved.length?saved.map((s,i)=>({s,i})).reverse().map(({s,i})=>`
-      <div class="card sent-saved">
-        <div class="grow"><div class="sent-text">${esc(s.text)}</div><div class="sent-word zh">${T("with","用了")} “${esc(s.w)}”</div></div>
-        <button class="speak-btn small sndonly" data-a="say" data-say="${esc(s.text)}">🔊</button>
-        <button class="sent-del" data-a="sent-del:${i}" aria-label="Delete 删除">🗑️</button>
-      </div>`).join(""):`<div class="card" style="text-align:center"><div style="font-size:2.2rem">✍️</div><div class="done-sub">${T("No sentences yet — make your first one!","还没有句子——来造第一句吧！")}</div></div>`}
-      <button class="btn btn-primary" data-a="sentence:practice">✍️ ${T("Make a sentence","造句")}</button>
-    </div>`;
-  }
+// The reusable sentence-maker guts (mode toggle, input/speak, grammar feedback, save),
+// bound to the current SENT state. Used both inline on each learn card and on the standalone screen.
+function sentMakerBody(W){
   const res=SENT.res, g=SENT.gram;
   const heardBox=SENT.heard?`<div class="sent-heard">“${esc(SENT.heard)}”</div>`:"";
   let fb="";
@@ -1412,6 +1402,44 @@ function rSentence(){
   const checking=res==="checking";
   const typeMode=SENT.mode==="type"||!micAvailable();
   return `
+    ${micAvailable()?`<div class="chip-group" style="justify-content:center;margin-bottom:.7rem">
+      <button class="chip ${!typeMode?"on":""}" data-a="sent-mode:speak">🎤 ${T("Say it","说出来")}</button>
+      <button class="chip ${typeMode?"on":""}" data-a="sent-mode:type">⌨️ ${T("Type it","打出来")}</button>
+    </div>`:""}
+    ${typeMode?`
+      <input type="text" id="sent-input" class="sent-input" placeholder="${esc(S.set.zh?"写下你的句子…":"Write your sentence…")}" value="${esc(SENT.draft||"")}" autocomplete="off" autocapitalize="sentences" ${checking?"disabled":""}>
+      ${checking
+        ?`<button class="btn btn-primary" disabled style="margin-top:.6rem;opacity:.6">⏳ ${T("Checking…","检查中……")}</button>`
+        :`<button class="btn btn-primary" data-a="sent-check" style="margin-top:.6rem">✓ ${T("Check my sentence","检查我的句子")}</button>`}
+    `:`
+      ${res==="listening"
+        ?`<div class="mic-res listening">🎤 ${T("Listening… say your sentence!","正在听……请说出你的句子！")}</div>`
+        :checking
+        ?`<button class="btn btn-primary" disabled style="opacity:.6">⏳ ${T("Checking…","检查中……")}</button>`
+        :`<button class="btn btn-primary" data-a="sent-speak">🎤 ${T("Say my sentence","说出我的句子")}</button>`}
+    `}
+    ${fb?`<div style="margin-top:.8rem">${fb}</div>`:""}
+    ${canSave?`<button class="btn btn-gold" data-a="sent-save" style="margin-top:.8rem">❤️ ${T("Save it","收藏")}</button>`:""}
+  `;
+}
+function rSentence(){
+  if(!SENT.word)SENT.word=pickSentenceWord();
+  const W=SENT.word, saved=S.sentences||[];
+  if(!W)return rHome();
+  if(SENT.view==="list"){
+    return `<div class="topbar"><button class="backbtn" data-a="tab:progress">‹ ${T("Back","返回")}</button><div class="screen-title">📒 ${T("My Sentences","我的句子")}</div></div>
+    <div class="stack">
+      ${saved.length?saved.map((s,i)=>({s,i})).reverse().map(({s,i})=>`
+      <div class="card sent-saved">
+        <div class="grow"><div class="sent-text">${esc(s.text)}</div><div class="sent-word zh">${T("with","用了")} “${esc(s.w)}”</div></div>
+        <button class="speak-btn small sndonly" data-a="say" data-say="${esc(s.text)}">🔊</button>
+        <button class="sent-del" data-a="sent-del:${i}" aria-label="Delete 删除">🗑️</button>
+      </div>`).join(""):`<div class="card" style="text-align:center"><div style="font-size:2.2rem">✍️</div><div class="done-sub">${T("No sentences yet. Make one while you learn a word!","还没有句子。学单词时顺便造一句吧！")}</div></div>`}
+      <button class="btn btn-primary" data-a="tab:levels">📚 ${T("Learn words in Lessons","去课程里学单词")}</button>
+    </div>`;
+  }
+  // Standalone practice view (kept for compatibility; making now lives on each learn card).
+  return `
   <div class="topbar"><button class="backbtn" data-a="tab:home">‹ ${T("Back","返回")}</button><div class="screen-title">✍️ ${T("Make a Sentence","造句")}</div></div>
   <div class="stack">
     <div class="card" style="text-align:center">
@@ -1426,24 +1454,7 @@ function rSentence(){
     </div>
     <div class="card">
       <div class="q-prompt" style="text-align:center;margin-bottom:.7rem">${T("Now make your own sentence with","现在用它造一个你自己的句子")} “${esc(W.en)}”.</div>
-      ${micAvailable()?`<div class="chip-group" style="justify-content:center;margin-bottom:.7rem">
-        <button class="chip ${!typeMode?"on":""}" data-a="sent-mode:speak">🎤 ${T("Say it","说出来")}</button>
-        <button class="chip ${typeMode?"on":""}" data-a="sent-mode:type">⌨️ ${T("Type it","打出来")}</button>
-      </div>`:""}
-      ${typeMode?`
-        <input type="text" id="sent-input" class="sent-input" placeholder="${esc(S.set.zh?"写下你的句子…":"Write your sentence…")}" value="${esc(SENT.draft||"")}" autocomplete="off" autocapitalize="sentences" ${checking?"disabled":""}>
-        ${checking
-          ?`<button class="btn btn-primary" disabled style="margin-top:.6rem;opacity:.6">⏳ ${T("Checking…","检查中……")}</button>`
-          :`<button class="btn btn-primary" data-a="sent-check" style="margin-top:.6rem">✓ ${T("Check my sentence","检查我的句子")}</button>`}
-      `:`
-        ${res==="listening"
-          ?`<div class="mic-res listening">🎤 ${T("Listening… say your sentence!","正在听……请说出你的句子！")}</div>`
-          :checking
-          ?`<button class="btn btn-primary" disabled style="opacity:.6">⏳ ${T("Checking…","检查中……")}</button>`
-          :`<button class="btn btn-primary" data-a="sent-speak">🎤 ${T("Say my sentence","说出我的句子")}</button>`}
-      `}
-      ${fb?`<div style="margin-top:.8rem">${fb}</div>`:""}
-      ${canSave?`<button class="btn btn-gold" data-a="sent-save" style="margin-top:.8rem">❤️ ${T("Save it","收藏")}</button>`:""}
+      ${sentMakerBody(W)}
     </div>
     <div class="row">
       <button class="btn btn-soft grow" data-a="sent-next">🔄 ${T("Another word","换个词")}</button>
@@ -1586,7 +1597,6 @@ function rHome(){
     </div>`}
     ${due>0?`
     <button class="btn btn-gold" data-a="review">🔁 ${T(`Review ${due} word${due>1?"s":""}`,`复习 ${due} 个单词`)}</button>`:""}
-    <button class="btn btn-soft" data-a="sentence">✍️ ${T("Make your own sentence","自己造句")}</button>
     <div class="card pod-card">
       <div class="eyebrow">Phrase of the day · 每日一句</div>
       <div class="phrase-en">${pod.en}</div>
@@ -1669,7 +1679,7 @@ function shuffle(a){a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(M
 function startLesson(unitId){
   const u=UNIT[unitId]; if(!u)return;
   micReset();
-  L={unit:u, words:u.words.map((w,i)=>WORD[u.id+":"+i]), i:0, stage:"learn", review:false};
+  L={unit:u, words:u.words.map((w,i)=>WORD[u.id+":"+i]), i:0, stage:"learn", review:false, sentOpen:false};
   UI.screen="lesson"; render();
 }
 function startReview(){
@@ -1740,6 +1750,13 @@ function rLearn(){
     </div>
     ${micAvailable()?micZone(w):`<div class="hintline">🗣️ ${T("Say it out loud!","大声跟读！")}</div>`}
   </div>
+  ${isPhrase?"":(L.sentOpen?`
+  <div class="card" style="margin-top:1rem">
+    <div class="q-prompt" style="text-align:center;margin-bottom:.6rem">✍️ ${T("Make a sentence with","用这个词造句")} “${esc(w.en)}”</div>
+    ${sentMakerBody(w)}
+    <button class="btn btn-plain" data-a="learn-sent:close" style="margin-top:.7rem">${T("Hide","收起")}</button>
+  </div>`:`
+  <button class="btn btn-soft" style="margin-top:1rem" data-a="learn-sent:open">✍️ ${T("Make a sentence with this word","用这个词造句")}</button>`)}
   <div class="stack" style="margin-top:1rem">
     <button class="btn btn-primary" data-a="learn:next">${L.i+1<n?T("Next","下一个"):T("Practise what you learned ➜","开始练习")}</button>
     ${L.i>0?`<button class="btn btn-plain" data-a="learn:prev">${T("‹ Previous","上一个")}</button>`:""}
@@ -1970,10 +1987,10 @@ function rProgress(){
       <div class="eyebrow" style="margin-bottom:.5rem">This week · 本周</div>
       ${chartSVG()}
     </div>
-    <button class="card sent-saved" style="width:100%;text-align:left" data-a="sentence">
+    <button class="card sent-saved" style="width:100%;text-align:left" data-a="sentence:list">
       <span style="font-size:1.9rem">✍️</span>
       <span class="grow"><span class="nm">${T("My Sentences","我的句子")}</span>
-        <span class="set-help" style="display:block">${(S.sentences||[]).length?T(`You've made ${S.sentences.length} sentence${S.sentences.length>1?"s":""}`,`你已经造了 ${S.sentences.length} 个句子`):T("Make your first sentence!","来造第一个句子吧！")}</span></span>
+        <span class="set-help" style="display:block">${(S.sentences||[]).length?T(`You've made ${S.sentences.length} sentence${S.sentences.length>1?"s":""}`,`你已经造了 ${S.sentences.length} 个句子`):T("Make sentences as you learn words!","学单词时顺便造句吧！")}</span></span>
       <span style="font-weight:900;color:var(--accent);font-size:1.2rem">➜</span>
     </button>
     <div class="card lvl-progress">
@@ -2120,9 +2137,15 @@ document.addEventListener("click",e=>{
     case "exit": exitLesson(); break;
     case "learn":
       micReset();
-      if(arg==="next"){ if(L.i+1<L.words.length){L.i++;} else {L.stage="quiz"; L.q=makeQuiz(L.words,false);} render(); }
-      else if(arg==="prev"&&L.i>0){L.i--; render();}
+      if(arg==="next"){ if(L.i+1<L.words.length){L.i++;} else {L.stage="quiz"; L.q=makeQuiz(L.words,false);} }
+      else if(arg==="prev"&&L.i>0){L.i--;}
+      if(L&&L.stage==="learn"&&L.sentOpen&&L.words[L.i]){SENT.word=L.words[L.i]; SENT.res=null; SENT.heard=""; SENT.draft=""; SENT.gram=null;} // rebind maker to the new word
+      render();
       break;
+    case "learn-sent":
+      if(arg==="open"){L.sentOpen=true; SENT.ctx="lesson"; SENT.word=L.words[L.i]; SENT.res=null; SENT.heard=""; SENT.draft=""; SENT.gram=null;}
+      else {L.sentOpen=false; SENT.res=null; SENT.heard=""; SENT.draft=""; SENT.gram=null;}
+      render(); break;
     case "say": speak(el.dataset.say); break;
     case "say-slow": speak(el.dataset.say,.55); break;
     case "ans": {
